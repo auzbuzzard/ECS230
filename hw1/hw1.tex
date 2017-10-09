@@ -3,9 +3,11 @@
 
 \documentclass[12pt,fleqn,leqno,letterpaper]{article}
 
+\usepackage{amssymb}
+
 \include{preamble}
 
-\title{Document Title}
+\title{Homework 1}
 \author{Eric Kalosa-Kenyon\\
 \small{ECS230}\\
 \small{UC Davis}\\
@@ -31,6 +33,35 @@
 
 %% BEGIN MAIN
 
+\section{Introduction}
+This report contains the exposition of five different elementary properties of
+real matrices nominally related to inverses and perturbation.
+
+\section{Properties of simple matrices}
+\begin{enumerate}
+    \item Let $A,B \in \mathbb{R}^{n\times n}$ and assume $A^{-1}$ and $B^{-1}$
+        both exist. The inverse of $AB$ is $(AB)^{-1} = B^{-1}A^{-1}$. To verify
+        this, I check that left and right multiplication by the proposed inverse
+        indeed maps $AB$ to the real identity matrix $I_{n\times n}$.\\
+        $(AB)^{-1}AB = B^{-1}A^{-1}AB = B^{-1}IB = B^{-1}B = I$.\\
+        $AB(AB)^{-1} = ABB^{-1}A^{-1} = AIA^{-1} = AA^{-1} = I$.\\
+        Hence, $(AB)^{-1} = B^{-1}A^{-1}$ as suggested.
+
+    \item Let $A\in\mathbb{R}^{n\times n}$. $Ax=0$ for every $x\in\mathbb{R}^n$
+        if and only if $A=0$. The $\Leftarrow$ proof is trivial and will be
+        oommitted. The $\Rightarrow$ proof will be presented with a contradiction
+        argument, as follows.\\
+        Suppose there is an element $a_{ij}$ of $A$ that is non-zero. Selecting
+        an $x\in\mathbb{R}^n$ with non-zero $x_j$ and zeros in every other
+        index, the product vector $Ax$ has an entry in the $j$th column equal to
+        precisely $a_{ij}x_j\neq 0$. Hence, for any matrix $A$ with at least one
+        non-zero element, one can find a subspace of $\mathbb{R}^n$ of
+        cardinality at least $\aleph_1$ containing elements such as $x$
+        described above that lie orthogonal to the null-space of $A$.
+
+    \item asdfh
+\end{enumerate}
+
 %% END MAIN
 
 % -- Bibliography (APA style)
@@ -41,4 +72,3 @@
 %%
 %% LaTeX Boilerplate (http://github.com/gbluma/latex-boilerplate/)
 %%
-
