@@ -59,7 +59,27 @@ real matrices nominally related to inverses and perturbation.
         cardinality at least $\aleph_1$ containing elements such as $x$
         described above that lie orthogonal to the null-space of $A$.
 
-    \item asdfh
+    \item Let $A\in\mathbb{R}^{n\times n}$ be strictly lower triangular. $A^n$,
+        the repeated multiplication of $A$ by itself $n$ times, is always
+        $A^n=0$. To verify this, I show that the first $i$ rows of $A^i$ are
+        $0^\top$.\\
+        By the definition of strict lower triangularity, the first row of
+        $A^1=A$ is trivially $0^\top$. Let $A_j^\top$ denote the vector
+        representation of the $j$th row of $A$. The first row of $A^2$ is
+        trivially $0^\top$ because the first row of $A^1$ is already $0^\top$.
+        It remains to show that the second row of $A^2$ is $0^\top$. To do so,
+        notice that $A_2^\top = [a_{2,1}, 0, \dots, 0]$ and that each
+        column vector of $A$ has a sequence of $0$s in its first indices with
+        a length least one $0$ i.e. at least the first entry is $0$ in all of
+        $A$'s column vectors. Denote these vectors $A_j^\star$. Notice that the
+        aforementioned zero indices of the $A_j^\star$ vectors force
+        $\langle A_2^\top, A_j^\star \rangle = 0$ for all $j\in\{1,\dots,n\}$.
+        Hence, the second row in $A^2$ is $0$. The strong inductive step
+        trivially employs the same argument as above for each inductive index
+        and is omitted here for brevity.
+
+    \item pr4
+    \item pr5
 \end{enumerate}
 
 %% END MAIN
