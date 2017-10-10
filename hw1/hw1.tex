@@ -82,7 +82,7 @@ real matrices nominally related to inverses and perturbation.
         The inverse of $A$ is $(I+uv^\top)^{-1} = \alpha(I-uv^\top)$. To verify
         this, as in the first problem, left and right multiplication to identity
         are checked, as follows.\\
-        $(I+uv^\top)\alpha(I-uv^\top) =
+        $(I+uv^\top)(I-\alpha uv^\top) =
         I + uv^\top - \alpha uv^\top - \alpha uv^\top uv^\top =
         I + (1 - \alpha(1 - u^\top v)) uv^\top$.
         To clarify the latest simplification,
@@ -94,7 +94,9 @@ real matrices nominally related to inverses and perturbation.
         $1/(1-c)$ which exists so long as $\langle u, v \rangle \neq
         0$.\\
         Checking right multiplication,
-        $\alpha(I-uv^\top)(I+uv^\top) =$
+        $(I-\alpha uv^\top)(I+uv^\top) =
+        I - \alpha uv^\top + uv^\top - \alpha c uv^\top =
+        I + (1 - \alpha(1+c))uv^\top = I$ as desired.
 
     \item pr5
 \end{enumerate}
