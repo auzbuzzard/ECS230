@@ -4,6 +4,9 @@
 \documentclass[12pt,fleqn,leqno,letterpaper]{article}
 
 \usepackage{amssymb}
+\usepackage{amsmath}
+
+\setlength{\parindent}{0cm} % Default is 15pt.
 
 \include{preamble}
 
@@ -39,6 +42,55 @@ problem and some performance measurements for different methods of square root
 calculation.
 
 \section{Relative error bounds}
+Consider the solution to
+$$Ax=b \textrm{ for } A\in\mathbb{R}_{2\times 2}
+\textrm{ and } b\in\mathbb{R}^2, b\neq 0$$
+given that the relative error on $b$ is bounded as follows:
+$$\frac{\|\delta b\|}{\|b\|}<\epsilon \textrm{ with } \epsilon>0$$
+where the norm used here is the infinity norm
+$$\|\omega\|=\|\omega\|_\infty=
+\begin{cases}
+    \underset{i}{\max} x_i &\text{if } \omega = x \in \mathbb{R}^n\\
+    \underset{\sum_{j=1}^n}{\max} |a_{ij}| &\text{if } \omega = A \in
+    \mathbb{R}_{n\times n}\\
+\end{cases}
+$$
+unless otherwise stated.
+
+Here, I consider the matrix
+$$
+A =
+\left[
+\begin{array}{cc}
+    a & a-1 \\
+    a-1 & a-2
+\end{array}
+\right]
+\textrm{ with } a\in R, a>2
+$$
+
+Notice that $|A|=1$ so $A$ is nonsingular and invertible - the inverse matrix
+follows:
+$$
+A^{-1} = \left[ \begin{array}{cc}
+    2-a & a-1 \\
+    a-1 & -a
+\end{array}\right]
+$$
+
+The condition number for a matrix is defined as $K(A) = \|A\| \|A^{-1}\|$. Here,
+this quantity works out to $K(A)=2a-1$. Next, I'll work out a bound on the
+relative error $\|\delta x\|/\|x\|$.
+
+Let $A(x + \delta x) = b + \delta b$ as in the standard backwards error
+calculation framework. Notice that, because $Ax=b$, the preceeding equation
+reduces to $A\delta x = \delta b$. $A$ is invertible, so
+$\delta x = A^{-1}\delta b$. Using a ubiquetous theorem and invoking the
+assumption on the relative error bound for $b$,
+$$
+\frac{\|\delta x\|}{\|x\|} \le K(A) \frac{\|\delta b\|}{\|b\|} < (2a-1)\epsilon
+\quad\blacksquare
+$$
 
 \section{Performance measurements}
 
