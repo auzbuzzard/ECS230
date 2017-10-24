@@ -1,0 +1,30 @@
+ clock:            67884  
+ t cpu:         0.067884 s
+ t real:        0.067888 s
+ clock:            64784  
+ t cpu:         0.064784 s
+ t real:        0.064787 s
+ clock:            66242  
+ t cpu:         0.066242 s
+ t real:        0.066245 s
+ clock:            68415  
+ t cpu:         0.068415 s
+ t real:        0.068417 s
+ clock:            65403  
+ t cpu:         0.065403 s
+ t real:        0.065406 s
+ clock:            65250  
+ t cpu:         0.065250 s
+ t real:        0.065253 s
+ clock:            64236  
+ t cpu:         0.064236 s
+ t real:        0.064238 s
+ clock:            65454  
+ t cpu:         0.065454 s
+ t real:        0.065457 s
+ clock:            68738  
+ t cpu:         0.068738 s
+ t real:        0.068742 s
+ clock:            67162  
+ t cpu:         0.067162 s
+ t real:        0.067165 s
