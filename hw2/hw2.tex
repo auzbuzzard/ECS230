@@ -79,7 +79,7 @@ A^{-1} = \left[ \begin{array}{cc}
 $$
 
 The condition number for a matrix is defined as $K(A) = \|A\| \|A^{-1}\|$. Here,
-this quantity works out to $K(A)=2a-1$. Next, I'll work out a bound on the
+this quantity works out to $K(A)=(2a-1)^2$. Next, I'll work out a bound on the
 relative error $\|\delta x\|/\|x\|$.
 
 Let $A(x + \delta x) = b + \delta b$ as in the standard backwards error
@@ -88,7 +88,8 @@ reduces to $A\delta x = \delta b$. $A$ is invertible, so
 $\delta x = A^{-1}\delta b$. Using a ubiquetous theorem and invoking the
 assumption on the relative error bound for $b$,
 $$
-\frac{\|\delta x\|}{\|x\|} \le K(A) \frac{\|\delta b\|}{\|b\|} < (2a-1)\epsilon
+\frac{\|\delta x\|}{\|x\|} \le K(A) \frac{\|\delta b\|}{\|b\|} <
+(2a-1)^2\epsilon
 \quad\blacksquare
 $$
 
@@ -113,7 +114,7 @@ $$
         \end{array}
         $$
         The square root proceedure $\sqrt{x}$ on $x=5000000$ takes about
-        $\aprox1650\pm 500$ clock cycles to converge. The clock cycles roughly
+        $\approx1650\pm 500$ clock cycles to converge. The clock cycles roughly
         equate to the number of microseconds required to compute the result, and
         these compute-time estimates are exactly as precise as the clock count.
 
@@ -179,6 +180,11 @@ $$
             10 & 140 & 3.162278 & 66835988 & 7.453559e+09
         \end{array}
         $$
+        The numerical result is identical across all runs for both sum and sqrt.
+        The clocks for sum deviate by 4 cycles, which may be accounted for by
+        loading an extra float from the L1 cache during calculation. The sqrt
+        program takes a much longer time to converge and the number of clock
+        cycles it requires are much more variable.
 
     \item Ran \texttt{"timing2 10000000"} ten times with the following
         results:\\
@@ -197,6 +203,11 @@ $$
             10 & 144 & 3.162278 & 131578104 & 2.108185e+10
         \end{array}
         $$
+        As before, the analytical results are identical across all runs.
+        However, the sqrt result is more accurate with more iterations.
+        Interestingly, the number of clock cycles required to compute the sum is
+        the exact same as the previous run, possibly due to convergence criteria
+        being met early in the program.
 
     \item Ran \texttt{"timing2 20000000"} ten times with the following
         results:\\
@@ -215,6 +226,9 @@ $$
             10 & 140 & 3.162278 & 261196322 & 5.962848e+10
         \end{array}
         $$
+        The number of cycles required for sqrt appears to scale linearly with
+        the input.
+
 \end{enumerate}
 
 %% END MAIN
