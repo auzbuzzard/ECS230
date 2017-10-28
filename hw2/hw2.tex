@@ -112,6 +112,10 @@ $$
             10 & 16758 & 0.016758 & 0.016759
         \end{array}
         $$
+        The square root proceedure $\sqrt{x}$ on $x=5000000$ takes about
+        $\aprox1650\pm 500$ clock cycles to converge. The clock cycles roughly
+        equate to the number of microseconds required to compute the result, and
+        these compute-time estimates are exactly as precise as the clock count.
 
     \item Ran \texttt{"timing1 10000000"} ten times with the following
         results:\\
@@ -121,7 +125,7 @@ $$
             1 & 32790 & 0.032790 & 0.032791 \\
             2 & 33462 & 0.033462 & 0.033625 \\
             3 & 32733 & 0.032733 & 0.032733 \\
-            4 & 33037 & 0.033037 & 0.033038\\
+            4 & 33037 & 0.033037 & 0.033038 \\
             5 & 32971 & 0.032971 & 0.032972 \\
             6 & 33374 & 0.033374 & 0.033376 \\
             7 & 33649 & 0.033649 & 0.033651 \\
@@ -130,6 +134,11 @@ $$
             10 & 34108 & 0.034108 & 0.034108
         \end{array}
         $$
+        The precision of each timing metric is identical, and the number of
+        clock cycles equate to the `t cpu` at a different order of magnitude.
+        The real time is not exactly the number of clock cycles, and this
+        measure of processing time deviates from the `t cpu` more than the same
+        program did for the $x=5000000$ case.
 
     \item Ran \texttt{"timing1 20000000"} ten times with the following
         results:\\
@@ -148,6 +157,10 @@ $$
             10 & 67162 & 0.067162 & 0.067165
         \end{array}
         $$
+        The trend of a larger deviation of the `t real` from the `t cpu`
+        continues in the $x=20000000$ case. Notice that `t real` is larger than
+        or equal to `t cpu` in all cases. This discrepancy may be accounted for
+        by other processes in the instruction queue.
 
     \item Ran \texttt{"timing2 5000000"} ten times with the following
         results:\\
