@@ -9,60 +9,51 @@
 
 int main()
 {
-  int m, n, p, q, c, d, k, sum = 0; // old author's
-  int N, i, j; // mine
+  int n, i, j, k;
+  double sum = 0;
 
   // get size of matrices from user
   printf("Enter the size (n) of A, B, and hence C (all are n by n):\n");
-  scanf("%d", &N);
+  scanf("%d", &n);
 
   // dynamic memory allocation for the matrices
-  double *A = malloc((N*N)* sizeof(double));
-  double *B = malloc((N*N)* sizeof(double));
-  double *C = malloc((N*N)* sizeof(double));
+  double *A = malloc((n*n)* sizeof(double));
+  double *B = malloc((n*n)* sizeof(double));
+  double *C = malloc((n*n)* sizeof(double));
   if ((A == NULL) || (B == NULL) || (C == NULL)) {
     fprintf(stderr, "malloc failed\n");
     return(-1);
   }
 
-  // get A from user
+  // get A and B from user
   printf("Enter the elements of first matrix\n");
-  for (j = 0; j < N; j++)
-    for (i = 0; i < N; i++)
+  for (j = 0; j < n; j++)
+    for (i = 0; i < n; i++)
       scanf("%lf", &A[i + n*j]); // using column-first indexing
 
-  /* printf("Enter the number of rows and columns of second matrix\n"); */
-  /* scanf("%d%d", &p, &q); */
+  printf("Enter the elements of second matrix\n");
+  for (j = 0; j < n; j++)
+    for (i = 0; i < n; i++)
+      scanf("%lf", &B[i + n*j]); // using column-first indexing
 
-  /* if (n != p) */
-  /*   printf("Matrices with entered orders can't be multiplied with each other.\n"); */
-  /* else */
-  /* { */
-  /*     printf("Enter the elements of second matrix\n"); */
+  for (j = 0; j < n; j++) {
+    for (i = 0; i < n; i++) {
+      for (k = 0; k < n; k++) {
+          sum = sum + A[i + n*k]*B[k + n*j];
+        }
 
-  /*     for (c = 0; c < p; c++) */
-  /*       for (d = 0; d < q; d++) */
-  /*         scanf("%d", &second[c][d]); */
+        C[i + n*j] = sum;
+        sum = 0;
+      }
+  }
 
-  /*     for (c = 0; c < m; c++) { */
-  /*           for (d = 0; d < q; d++) { */
-  /*                   for (k = 0; k < p; k++) { */
-  /*                             sum = sum + first[c][k]*second[k][d]; */
-  /*                           } */
+  printf("Product C of AB:\n");
 
-  /*                   multiply[c][d] = sum; */
-  /*                   sum = 0; */
-  /*                 } */
-  /*         } */
-
-  /*     printf("Product of entered matrices:-\n"); */
-
-  /*     for (c = 0; c < m; c++) { */
-  /*           for (d = 0; d < q; d++) */
-  /*             printf("%d\t", multiply[c][d]); */
-  /*           printf("\n"); */
-  /*         } */
-  /*   } */
+  for (j = 0; j < n; j++) {
+      for (i = 0; i < n; i++)
+        printf("%lf\t", C[i + n*j]);
+      printf("\n");
+    }
 
   // ## CLEAN UP
   free(A); // clean up unused arrays that were dynamically allocated
