@@ -3,24 +3,26 @@
 // Sources:
 //  1. http://www.programmingsimplified.com/c-program-multiply-matrices
 //  2. https://en.wikipedia.org/wiki/C_dynamic_memory_allocation
+//  3. http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw3/dotblas.c
 
-#include <stdio.h>
-#include <stdlib.h>
+#include<stdio.h>
+#include<stdlib.h>
 
-int main()
+int main(int argc, char** argv)
 {
 
-  int n, i, j, k;
+  int n = atoi(argv[1]); // first commandline char
+  int i, j, k;
   double sum = 0;
 
-  // get size of matrices from user
-  printf("Enter the size (n) of A, B, and hence C (all are n by n):\n");
-  scanf("%d", &n);
+  /* // get size of matrices from user */
+  /* printf("Enter the size (n) of A, B, and hence C (all are n by n):\n"); */
+  /* scanf("%d", &n); */
 
   // dynamic memory allocation for the matrices
-  double *A = malloc((n*n)* sizeof(double));
-  double *B = malloc((n*n)* sizeof(double));
-  double *C = malloc((n*n)* sizeof(double));
+  double *A = (double*)malloc((n*n)* sizeof(double));
+  double *B = (double*)malloc((n*n)* sizeof(double));
+  double *C = (double*)malloc((n*n)* sizeof(double));
   if ((A == NULL) || (B == NULL) || (C == NULL)) {
     fprintf(stderr, "malloc failed\n");
     return(-1);
@@ -72,6 +74,7 @@ int main()
       printf("\n");
   }
 
+  // display product C = AB
   printf("Product C of AB:\n");
   for (i = 0; i < n; i++) {
     for (j = 0; j < n; j++)
