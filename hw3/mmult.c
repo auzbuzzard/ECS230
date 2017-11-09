@@ -42,7 +42,7 @@ int main()
           sum = sum + A[i + n*k]*B[k + n*j];
         }
 
-        C[i + n*j] = sum;
+        C[j + n*i] = sum;
         sum = 0;
       }
   }
