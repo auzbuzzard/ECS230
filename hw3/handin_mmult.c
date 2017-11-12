@@ -9,9 +9,8 @@
 // Sources:
 //  1. http://www.programmingsimplified.com/c-program-multiply-matrices
 //  2. https://en.wikipedia.org/wiki/C_dynamic_memory_allocation
-//  3. http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw3/dotblas.c
-//  4. http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw2/timing1.c
-//  5. http://www.cplusplus.com/forum/windows/192252/
+//  3. http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/
+//  4. http://www.cplusplus.com/forum/windows/192252/
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -70,24 +69,9 @@ int main(int argc, char** argv)
     return(-1);
   }
 
-  /* // get size of matrices from user */
-  /* printf("Enter the size (n) of A, B, and hence C (all are n by n):\n"); */
-  /* scanf("%d", &n); */
-  /* // get A and B from user */
-  /* printf("Enter the elements of first matrix\n"); */
-  /* for (j = 0; j < n; j++) */
-  /*   for (i = 0; i < n; i++) */
-  /*     scanf("%lf", &A[i + n*j]); // using column-first indexing */
-  /* printf("Enter the elements of second matrix\n"); */
-  /* for (j = 0; j < n; j++) */
-  /*   for (i = 0; i < n; i++) */
-  /*     scanf("%lf", &B[i + n*j]); // using column-first indexing */
-
   // make arbitrary matrices A and B
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) {
-      /* A[i + n*j] = random(); */
-      /* B[i + n*j] = random(); */
       A[i + n*j] = 1.0/(i + n*j + 1);
       B[i + n*j] = 2.0/(i + n*j + 1);
     }
@@ -112,36 +96,8 @@ int main(int argc, char** argv)
   stop = readTSC();
   time_elapsed = stop - start;
 
-  /* printf(" t cpu:  %15.6f s\n", t_cpu ); */
-  /* printf(" t real: %15.6f s\n", t_real ); */
-  /* printf(" start: %15ld s\n", start ); */
-  /* printf(" stop: %15ld s\n", stop ); */
-  /* printf(" clocks_per_sec: %d flp/s\n", CLOCKS_PER_SEC ); */
   printf(" clock cycles: %ld \t\t clocks\n", time_elapsed );
   printf(" time elapsed: %f \t s\n", t_real );
-
-  return 0;
-
-  /* // display A and B */
-  /* printf("Matrix A:\n"); */
-  /* for (i = 0; i < n; i++) { */
-  /*   for (j = 0; j < n; j++) */
-  /*       printf("%lf\t", A[i + n*j]); */
-  /*     printf("\n"); */
-  /* } */
-  /* printf("Matrix B:\n"); */
-  /* for (i = 0; i < n; i++) { */
-  /*   for (j = 0; j < n; j++) */
-  /*       printf("%lf\t", B[i + n*j]); */
-  /*     printf("\n"); */
-  /* } */
-  /* // display product C = AB */
-  /* printf("Product C of AB:\n"); */
-  /* for (i = 0; i < n; i++) { */
-  /*   for (j = 0; j < n; j++) */
-  /*     printf("%lf\t", C[i + n*j]); */
-  /*   printf("\n"); */
-  /* } */
 
   return 0;
 }
