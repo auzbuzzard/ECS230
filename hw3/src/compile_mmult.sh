@@ -1,2 +1,2 @@
 #!/bin/bash
-gcc -o ../mmult mmult.c
+gcc -o ../bin/mmult mmult.c

@@ -3,7 +3,7 @@
 # Analysis script for repeated matrix multiplications
 
 ## @knitr READ
-df = read.table("n50_r100_ord1.csv", header=T, sep=",")
+df = read.table("../data/n50_r100_ord1.csv", header=T, sep=",")
 head(df)
 
 ## @knitr PLOT

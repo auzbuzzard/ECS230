@@ -18,7 +18,7 @@ source code included in the last section of this report.
 ## Repeated multiplications
 ```{r, echo=F}
 library("knitr")
-read_chunk("hw3.R")
+read_chunk("../src/hw3.R")
 ```
 
 ```{r READ}
@@ -30,5 +30,5 @@ read_chunk("hw3.R")
 
 # Source code
 ```{r engine='bash', comment=''}
-cat mmult.c
+cat ../src/mmult.c
 ```
