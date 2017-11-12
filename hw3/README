@@ -1,0 +1,5 @@
+Matrix multiplication timing
+
+To compile: gcc -o mmult mmult.c
+To run: ./mmult 50 100 > n50_r10_ord1.csv
+    Runs a 50x50 matrix multiplication 100 times, writes to .csv
