@@ -1,0 +1,34 @@
+---
+title: "ECS230 Hw3"
+author:
+- Eric Kalosa-Kenyon
+date: "`r format(Sys.time(), '%d %B %Y')`"
+
+abstract: In this assignment, I time matrix multiplications to assess processor performance in basic linear algebra operations.
+
+output:
+  html_document:
+    toc: yes
+---
+
+# Matrix multiplication
+In this section, I report the results of the timing subroutines developed in the
+source code included in the last section of this report.
+
+## Repeated multiplications
+```{r, echo=F}
+library("knitr")
+read_chunk("hw3.R")
+```
+
+```{r READ}
+```
+
+```{r PLOT}
+```
+
+
+# Source code
+```{r engine='bash', comment=''}
+cat mmult.c
+```
