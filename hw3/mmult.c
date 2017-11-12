@@ -5,6 +5,7 @@
 //  2. https://en.wikipedia.org/wiki/C_dynamic_memory_allocation
 //  3. http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw3/dotblas.c
 //  4. http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw2/timing1.c
+//  5. http://www.cplusplus.com/forum/windows/192252/
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -20,6 +21,19 @@ volatile double gtod(void) {
   return tv.tv_sec + 1.e-6*tv.tv_usec;
 }
 
+long long readTSC(void)
+{
+  /* read the time stamp counter on Intel x86 chips */
+  /* Directly from timing2.c on ~fgygi */
+  /* http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw2/timing2.c */
+  union { long long complete; unsigned int part[2]; } ticks;
+  __asm__ ("rdtsc; mov %%eax,%0;mov %%edx,%1"
+    : "=mr" (ticks.part[0]), "=mr" (ticks.part[1])
+    : /* no inputs */
+    : "eax", "edx");
+  return ticks.complete;
+}
+
 int main(int argc, char** argv)
 {
 
@@ -31,7 +45,9 @@ int main(int argc, char** argv)
   // initialize timing elements
   clock_t clk;
   double t, t_cpu, t_real;
+  int start, stop;
   clk = clock();
+  /* start = __rdtsc(); */ //TODO find out how to use readTSC() for timing
   t = gtod();
 
   // dynamic memory allocation for the matrices
@@ -53,12 +69,12 @@ int main(int argc, char** argv)
   /*     scanf("%lf", &A[i + n*j]); // using column-first indexing */
   /* printf("Enter the elements of second matrix\n"); */
   /* for (j = 0; j < n; j++) */
-  /*   for (i = 0; i < n; i++) // TODO: optimize allocation to loop nesting */
+  /*   for (i = 0; i < n; i++) */
   /*     scanf("%lf", &B[i + n*j]); // using column-first indexing */
 
   // make arbitrary matrices A and B
   for (j = 0; j < n; j++) {
-    for (i = 0; i < n; i++) { // TODO: optimize allocation to loop nesting
+    for (i = 0; i < n; i++) {
       /* A[i + n*j] = random(); */
       /* B[i + n*j] = random(); */
       A[i + n*j] = 1.0/(i + n*j + 1);
@@ -77,8 +93,6 @@ int main(int argc, char** argv)
         sum = 0.0;
       }
   }
-
-  printf("matrix multiplication finished\n");
 
   // display timing results
   long long delta_clock = clock() - clk;
