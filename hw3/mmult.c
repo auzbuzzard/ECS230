@@ -50,16 +50,9 @@ int main(int argc, char** argv)
 
   // initialize matrix size and indexing variables
   int n = atoi(argv[1]); // size of mx from commandline
-  int i, j, k;
+  int r = atoi(argv[2]); // number of times to perform the multiplication
+  int i, j, k, s; // indicies for matrix arrays
   double sum = 0.0;
-
-  // initialize timing elements
-  clock_t clk;
-  double tod, t_cpu, t_real;
-  long start, stop, time_elapsed;
-  clk = clock();
-  start = readTSC();
-  tod = gtod();
 
   // dynamic memory allocation for the matrices
   double *A = (double*)malloc((n*n)* sizeof(double));
@@ -69,6 +62,17 @@ int main(int argc, char** argv)
     fprintf(stderr, "malloc failed\n");
     return(-1);
   }
+
+  // make arbitrary matrices A and B
+  for (j = 0; j < n; j++) {
+    for (i = 0; i < n; i++) {
+      /* A[i + n*j] = random(); */
+      /* B[i + n*j] = random(); */
+      A[i + n*j] = 1.0/(i + n*j + 1);
+      B[i + n*j] = 2.0/(i + n*j + 1);
+    }
+  }
+
 
   /* // get size of matrices from user */
   /* printf("Enter the size (n) of A, B, and hence C (all are n by n):\n"); */
@@ -83,42 +87,56 @@ int main(int argc, char** argv)
   /*   for (i = 0; i < n; i++) */
   /*     scanf("%lf", &B[i + n*j]); // using column-first indexing */
 
-  // make arbitrary matrices A and B
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < n; i++) {
-      /* A[i + n*j] = random(); */
-      /* B[i + n*j] = random(); */
-      A[i + n*j] = 1.0/(i + n*j + 1);
-      B[i + n*j] = 2.0/(i + n*j + 1);
-    }
-  }
+  // initialize timing elements
+  clock_t clk;
+  double tod, t_cpu, t_real;
+  long start, stop, time_elapsed;
+  long long delta_clock;
 
-  // perform multiplication C = AB
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < n; i++) {
-      for (k = 0; k < n; k++) {
-          sum = sum + A[i + n*k]*B[k + n*j];
+  // perform AB r times
+  printf("clocks, time\n");
+  for (s = 0; s < r; s++) {
+
+    // start timing
+    clk = clock();
+    start = readTSC();
+    tod = gtod();
+
+    // perform multiplication C = AB
+    for (j = 0; j < n; j++) {
+      for (i = 0; i < n; i++) {
+        for (k = 0; k < n; k++) {
+            sum = sum + A[i + n*k]*B[k + n*j];
+          }
+
+          C[i + n*j] = sum;
+          sum = 0.0;
         }
+    }
 
-        C[i + n*j] = sum;
-        sum = 0.0;
-      }
-  }
+    // determine and display timing results
+    delta_clock = clock() - clk;
+    t_real = gtod() - tod;
+    stop = readTSC();
+    time_elapsed = stop - start;
 
-  // determine and display timing results
-  long long delta_clock = clock() - clk;
-  t_cpu = ( (double) delta_clock ) / CLOCKS_PER_SEC;
-  t_real = gtod() - tod;
-  stop = readTSC();
-  time_elapsed = stop - start;
+    printf("%ld, %f\n", time_elapsed, t_real );
 
-  /* printf(" t cpu:  %15.6f s\n", t_cpu ); */
-  /* printf(" t real: %15.6f s\n", t_real ); */
-  /* printf(" start: %15ld s\n", start ); */
-  /* printf(" stop: %15ld s\n", stop ); */
-  /* printf(" clocks_per_sec: %d flp/s\n", CLOCKS_PER_SEC ); */
-  printf(" clock cycles: %ld \t\t clocks\n", time_elapsed );
-  printf(" time elapsed: %f \t s\n", t_real );
+    /* t_cpu = ( (double) delta_clock ) / CLOCKS_PER_SEC; */
+    /* printf(" t cpu:  %15.6f s\n", t_cpu ); */
+    /* printf(" t real: %15.6f s\n", t_real ); */
+    /* printf(" start: %15ld s\n", start ); */
+    /* printf(" stop: %15ld s\n", stop ); */
+    /* printf(" clocks_per_sec: %d flp/s\n", CLOCKS_PER_SEC ); */
+    /* printf(" clock cycles: %ld \t\t clocks\n", time_elapsed ); */
+    /* printf(" time elapsed: %f \t s\n", t_real ); */
+
+  } // END for loop over R (multiply AB multiple times)
+
+  // Remove the matrices from memory
+  free(A);
+  free(B);
+  free(C);
 
   return 0;
 
