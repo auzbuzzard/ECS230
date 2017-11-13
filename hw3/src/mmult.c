@@ -68,8 +68,8 @@ int main(int argc, char** argv)
     for (i = 0; i < n; i++) {
       /* A[i + n*j] = random(); */
       /* B[i + n*j] = random(); */
-      A[i + n*j] = 1.0/(i + n*j + 1);
-      B[i + n*j] = 2.0/(i + n*j + 1);
+      A[i + n*j] = i/(j+1.0) + 1.0/(i + n*j + 1);
+      B[i + n*j] = j/(i+1.0) + 2.0/(i + n*j + 1);
     }
   }
 
