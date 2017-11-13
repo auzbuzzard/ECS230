@@ -29,8 +29,37 @@ read_chunk("../src/hw3.R")
 ```
 
 ## Loop rearrangement
+Using column-major ordering (i.e. $i + n*j$) for array indexing into the $i$th
+row and $j$th column. The following experiment times different orderings of the
+embedded for loops used to calculate the matrix product. A typical ordering
+may look like the following:
+```
+sum = 0
+for(i in 1:n){
+    for(j in 1:n){
+        for(k in 1:n){
+             sum += A[i + k*n] * B[k + i*n]
+        }
+        C[i + n*j] = sum
+        sum = 0
+    }
+}
+```
+
+The preceeding code snippet reflects the following matrix product definition:
+$$
+A_{n\times n} B_{n\times n} = C_{n\times n} = (c_{i,j})_{1\le i, j\le n} =
+(\sum_{k=1}^n a_{i, k} b_{k, j}) =
+(\langle \vec{a_i^\top}, \vec{b_j} \rangle )_{1\le i,j\le n}
+$$
+
 ```{r PR2}
 ```
+
+## Comments on performance
+There were no attempts to make use of block structures in this multiplication.
+The result of this negligance is that once the size of the matrix exceeds the
+size of the processor's L1 cache, the speed of computation is massively reduced.
 
 # Source code
 ```{r engine='bash', comment=''}
