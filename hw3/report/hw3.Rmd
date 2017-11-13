@@ -9,6 +9,7 @@ abstract: In this assignment, I time matrix multiplications to assess processor 
 output:
   html_document:
     toc: yes
+    smart: false
 ---
 
 # Matrix multiplication
@@ -21,14 +22,19 @@ library("knitr")
 read_chunk("../src/hw3.R")
 ```
 
-```{r READ}
+```{r SETUP}
 ```
 
-```{r PLOT}
+```{r PR1}
 ```
 
+# Loop rearrangement
+```{r PR2}
+```
 
 # Source code
 ```{r engine='bash', comment=''}
-cat ../src/mmult.c
+# cat ../src/mmult.c
+# cat ../src/all_looptypes_mmult.c
+# cat ../src/dgemm_mmult.c
 ```
