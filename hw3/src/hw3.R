@@ -26,6 +26,9 @@ for(fn in simfiles_ord1){
     fp = paste(data_dir, fn, sep="")
     df = read.table(fp, header=T, sep=",")
     df$batch = fn
+    # remove outliers
+    rmv.ixs = which(df$clocks > mean(df$clocks) + 2*sqrt(var(df$clocks)))
+    df = df[-rmv.ixs,]
     df1 = rbind(df1, df)
 }
 df1 = na.omit(df1)
@@ -48,6 +51,9 @@ for(fn in simfiles_pr2){
     fp = paste(data_dir, fn, sep="")
     df = read.table(fp, header=T, sep=",")
     df$batch = fn
+    # remove outliers
+    rmv.ixs = which(df$clocks > mean(df$clocks) + 2*sqrt(var(df$clocks)))
+    df = df[-rmv.ixs,]
     df2 = rbind(df2, df)
 }
 df2 = na.omit(df2)
@@ -63,4 +69,3 @@ plt4 = ggplot(df2, aes(clocks, fill=loop_order)) + geom_histogram() +
     facet_wrap(~batch, scales="free") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 plt4
-

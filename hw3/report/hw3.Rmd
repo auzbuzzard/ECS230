@@ -28,7 +28,7 @@ read_chunk("../src/hw3.R")
 ```{r PR1}
 ```
 
-# Loop rearrangement
+## Loop rearrangement
 ```{r PR2}
 ```
 
