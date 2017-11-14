@@ -22,10 +22,10 @@ library("knitr")
 read_chunk("../src/hw3.R")
 ```
 
-```{r SETUP}
+```{r SETUP, echo=F}
 ```
 
-```{r PR1}
+```{r PR1, echo=F}
 ```
 
 ## Loop rearrangement
@@ -33,6 +33,7 @@ Using column-major ordering (i.e. $i + n*j$) for array indexing into the $i$th
 row and $j$th column. The following experiment times different orderings of the
 embedded for loops used to calculate the matrix product. A typical ordering
 may look like the following:
+
 ```
 sum = 0
 for(i in 1:n){
@@ -53,13 +54,29 @@ A_{n\times n} B_{n\times n} = C_{n\times n} = (c_{i,j})_{1\le i, j\le n} =
 (\langle \vec{a_i^\top}, \vec{b_j} \rangle )_{1\le i,j\le n}
 $$
 
-```{r PR2}
+```{r PR2, echo=F}
+```
+
+The loop orderings are as follows, using column-major indexing:
+1. jik
+2. jki
+3. ijk
+4. ikj
+5. kji
+6. kij
+
+## Using BLAS dgemm()
+```{r PR3, echo=F}
 ```
 
 ## Comments on performance
 There were no attempts to make use of block structures in this multiplication.
 The result of this negligance is that once the size of the matrix exceeds the
 size of the processor's L1 cache, the speed of computation is massively reduced.
+
+The number of flops theoretically required to perform a basic matrix
+multiplication is $2n^3$. The $2$ is due to the addition and multiplication in
+$s = s + a_{i,k}b_{k,j}$ and the $n^3$ is due to the three embedded for loops.
 
 # Source code
 ```{r engine='bash', comment=''}
