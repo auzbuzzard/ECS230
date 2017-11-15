@@ -3,6 +3,7 @@
 // This program times matrix multiplication and reports results.
 // Takes:
 //      n - command line input, size of matrices to multiply
+//      r - command line input, number of times to perform this multiplication
 // Returns:
 //      stdio - timing results
 //
@@ -20,16 +21,6 @@
 #include "math.h"
 
 // BEGIN SUBROUTINES
-volatile double gtod(void) {
-  /* Get time of day */
-  /* Directly from timing1.c on ~fgygi */
-  /* http://web.cs.ucdavis.edu/~fgygi/ecs230/homework/hw2/timing1.c */
-  static struct timeval tv;
-  static struct timezone tz;
-  gettimeofday(&tv,&tz);
-  return tv.tv_sec + 1.e-6*tv.tv_usec;
-}
-
 long long readTSC(void)
 {
   /* Read the time stamp counter on Intel x86 chips */
@@ -66,41 +57,22 @@ int main(int argc, char** argv)
   // make arbitrary matrices A and B
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) {
-      /* A[i + n*j] = random(); */
-      /* B[i + n*j] = random(); */
       A[i + n*j] = i/(j+1.0) + 1.0/(i + n*j + 1);
       B[i + n*j] = j/(i+1.0) + 2.0/(i + n*j + 1);
     }
   }
 
 
-  /* // get size of matrices from user */
-  /* printf("Enter the size (n) of A, B, and hence C (all are n by n):\n"); */
-  /* scanf("%d", &n); */
-  /* // get A and B from user */
-  /* printf("Enter the elements of first matrix\n"); */
-  /* for (j = 0; j < n; j++) */
-  /*   for (i = 0; i < n; i++) */
-  /*     scanf("%lf", &A[i + n*j]); // using column-first indexing */
-  /* printf("Enter the elements of second matrix\n"); */
-  /* for (j = 0; j < n; j++) */
-  /*   for (i = 0; i < n; i++) */
-  /*     scanf("%lf", &B[i + n*j]); // using column-first indexing */
-
   // initialize timing elements
-  clock_t clk;
-  double tod, t_cpu, t_real;
-  long start, stop, time_elapsed;
-  long long delta_clock;
+  double t_real, cpu_speed = 4000000000.0;
+  long start, stop, t_cpu;
 
   // perform AB r times
   printf("clocks, time\n");
   for (s = 0; s < r; s++) {
 
     // start timing
-    clk = clock();
     start = readTSC();
-    tod = gtod();
 
     // perform multiplication C = AB
     for (j = 0; j < n; j++) {
@@ -115,51 +87,13 @@ int main(int argc, char** argv)
     }
 
     // determine and display timing results
-    delta_clock = clock() - clk;
-    t_real = gtod() - tod;
     stop = readTSC();
-    time_elapsed = stop - start;
+    t_cpu = stop - start;
+    t_real = t_cpu / cpu_speed;
 
-    printf("%ld, %f\n", time_elapsed, t_real );
-
-    /* t_cpu = ( (double) delta_clock ) / CLOCKS_PER_SEC; */
-    /* printf(" t cpu:  %15.6f s\n", t_cpu ); */
-    /* printf(" t real: %15.6f s\n", t_real ); */
-    /* printf(" start: %15ld s\n", start ); */
-    /* printf(" stop: %15ld s\n", stop ); */
-    /* printf(" clocks_per_sec: %d flp/s\n", CLOCKS_PER_SEC ); */
-    /* printf(" clock cycles: %ld \t\t clocks\n", time_elapsed ); */
-    /* printf(" time elapsed: %f \t s\n", t_real ); */
+    printf("%ld, %f\n", t_cpu, t_real );
 
   } // END for loop over R (multiply AB multiple times)
-
-  // Remove the matrices from memory
-  free(A);
-  free(B);
-  free(C);
-
-  return 0;
-
-  /* // display A and B */
-  /* printf("Matrix A:\n"); */
-  /* for (i = 0; i < n; i++) { */
-  /*   for (j = 0; j < n; j++) */
-  /*       printf("%lf\t", A[i + n*j]); */
-  /*     printf("\n"); */
-  /* } */
-  /* printf("Matrix B:\n"); */
-  /* for (i = 0; i < n; i++) { */
-  /*   for (j = 0; j < n; j++) */
-  /*       printf("%lf\t", B[i + n*j]); */
-  /*     printf("\n"); */
-  /* } */
-  /* // display product C = AB */
-  /* printf("Product C of AB:\n"); */
-  /* for (i = 0; i < n; i++) { */
-  /*   for (j = 0; j < n; j++) */
-  /*     printf("%lf\t", C[i + n*j]); */
-  /*   printf("\n"); */
-  /* } */
 
   return 0;
 }

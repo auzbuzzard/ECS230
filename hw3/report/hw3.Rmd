@@ -13,10 +13,15 @@ output:
 ---
 
 # Matrix multiplication
-In this section, I report the results of the timing subroutines developed in the
-source code included in the last section of this report.
+Developed here are three methods for assessing processor and algorithm
+performance. First, a simple matrix multiplication algorithm written in C is
+assessed for number of clock cycles elapsed over execution with square matrices
+of size 100, 200, 500, 1000, and 2000 doubles each. Next, all six loop orderings
+for the simple matrix multiplication algorithm, discussed in more detail below,
+are considered. Finally, the standard BLAS dgemm function is used to benchmark
+the preceeding algorithms.
 
-## Repeated multiplications
+## Matrix multiplication performance
 ```{r, echo=F}
 library("knitr")
 read_chunk("../src/hw3.R")
@@ -25,12 +30,28 @@ read_chunk("../src/hw3.R")
 ```{r SETUP, echo=F}
 ```
 
+The following graphs summarize the results of repeated matrix multiplications.
+Each color graph represents the results from a single sized matrix - for
+example, the green graph depicts the results of multiplying two 200 by 200
+matrices. The heights of the signals in the graphs correspond to the frequency
+of the associated timing on the x axis - for example, the algorithm typically
+required 0.002165 seconds to multiply two 100 by 100 matrices.
 ```{r PR1, echo=F}
 ```
 
 ## Loop rearrangement
+
+Matrix multiplication is defined as follows (for n by n real matrices):
+$$
+A_{n\times n} B_{n\times n} = C_{n\times n} = (c_{i,j})_{1\le i, j\le n} =
+(\sum_{k=1}^n a_{i, k} b_{k, j}) =
+(\langle \vec{a_i^\top}, \vec{b_j} \rangle )_{1\le i,j\le n}
+$$
+The question naturally arises: which index should come first in a looping matrix
+multiplication algorithm? This section is an attempt to answer that question.
+
 Using column-major ordering (i.e. $i + n*j$) for array indexing into the $i$th
-row and $j$th column. The following experiment times different orderings of the
+row and $j$th column, the following experiment times different orderings of the
 embedded for loops used to calculate the matrix product. A typical ordering
 may look like the following:
 
@@ -46,13 +67,8 @@ for(i in 1:n){
     }
 }
 ```
-
-The preceeding code snippet reflects the following matrix product definition:
-$$
-A_{n\times n} B_{n\times n} = C_{n\times n} = (c_{i,j})_{1\le i, j\le n} =
-(\sum_{k=1}^n a_{i, k} b_{k, j}) =
-(\langle \vec{a_i^\top}, \vec{b_j} \rangle )_{1\le i,j\le n}
-$$
+Each of the loop orderings is a permutation of the i, j, and k loops in the
+above snippet.
 
 ```{r PR2, echo=F}
 ```
@@ -65,22 +81,81 @@ The loop orderings are as follows, using column-major indexing:
 5. kji
 6. kij
 
+The graphs above indicate that the $jki$ and $kji$ orderings are the fastest.
+Were the implementation to use row-major rather than column-major indexing, one
+might reasonably expect the roles of $i$ and $j$ to be reversed in the rankings.
+
 ## Using BLAS dgemm()
+There are many more optimizations possible for the matrix multiplication
+algorithm beyond simply using the most effective loop ordering. The mature BLAS
+linear algebra package available in C implements a screaming fast matrix
+multiplication function titled dgemm(). The results of timing the dgemm()
+algorithm follow:
+
 ```{r PR3, echo=F}
 ```
+One can see that, in addition to being much faster than the simple
+implementation presented in the preceeding sections, the dgemm() multiplication
+has a lower spread of results. The take-away here is that one should, in
+production settings, rely on the BLAS rather than custom matrix multiplication
+algorithms.
 
 ## Comments on performance
-There were no attempts to make use of block structures in this multiplication.
-The result of this negligance is that once the size of the matrix exceeds the
-size of the processor's L1 cache, the speed of computation is massively reduced.
+Among many available speedups, there were no attempts to make use of block
+structures in this multiplication. The result of this negligance is that once
+the size of the matrix exceeds the size of the processor's L1 cache, the speed
+of computation is massively reduced.
 
+### Gflop/sec performance measurement
 The number of flops theoretically required to perform a basic matrix
 multiplication is $2n^3$. The $2$ is due to the addition and multiplication in
 $s = s + a_{i,k}b_{k,j}$ and the $n^3$ is due to the three embedded for loops.
 
+Hence, the performance in Gflops/sec for two 1000 by 1000 matrices using the
+BLAS dgemm function is
+$\frac{2*1000^3 flop}{0.012 sec} \approx 167*10^9 \frac{flop}{sec} =
+167 \frac{Gflop}{sec}$.
+The corresponding performance metric for the implementation presented in the
+first section on 1000 by 1000 matrices is
+$\frac{2*1000^3 flop}{3.595 sec} \approx 0.55 \frac{Gflop}{sec}$.
+
+### Peak performance
+The peak performance of a 4.0 GHz processor depends on a number of factors,
+including but not limited to SMID registers, fused add-multiply, hyperthreading,
+and "turbo boost".
+
+Depending on the aforementioned factors, the typical number of flops per clock
+cycle is between 1 and 4. The processor's advertised speed is $4*10^9$
+cycles per second. Hence, a reasonable estimate for processor performance is
+between 4 and 16 Gflops/sec.
+
+Fused add-multiply can cut the number of flops required in the
+`sum = sum + a*b` step down from 2 to 1. This would reduce the number of flops
+required for matrix multiplication from $2n^3$ to $n^3$. Due to the
+embarassingly parallelizable nature of the algorithm, hyperthreading and
+multiple cores can potentially increase the number of flops/sec possible on the
+i7 processor. Without parallelization, the overclocking turbo-boost feature of
+the processor may increase the cycles/sec of a single core beyond its advertised
+speed. Finally, SMID (https://en.wikipedia.org/wiki/SIMD) allows multiple data
+to be acted on by the same opperator. Among many obvious and sophisticated uses
+of SMID in matrix algorithms, singly applying the operator
+$\langle\cdot, B_{:,j}\rangle$ identically to every row in $A$ would, in an
+ideal case, cut the number of flops required in the algorithm by a factor of
+$n$.
+
+Certianly, these and other optimizations are implemented in the BLAS package,
+and the speedup they bring is immediately apparent upon timing an
+unsophisticated matrix multiplication algorithm.
+
 # Source code
-```{r engine='bash', comment=''}
-# cat ../src/mmult.c
-# cat ../src/all_looptypes_mmult.c
-# cat ../src/dgemm_mmult.c
+Please note that the following source is a Frankenstein work, and the sources
+referenced in the header were hugely helpful. Furthermore, the code handed in on
+the CSIF computers is slightly different from the following source - the handed
+in code conforms to the specifications of the assignment, wheras the following
+source is the code used to time matrix multiplications in the first section.
+Timings in subsequent sections were performed using similar code, not worth
+reproducing here for brevity.
+
+```{r engine='bash', comment='', echo=F}
+cat ../src/mmult.c
 ```

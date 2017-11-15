@@ -8,16 +8,17 @@ library(ggplot2)
 data_dir = "../data/"
 
 simfiles_ord1 = c("n1000_r20_ord1.csv", "n100_r1000_ord1.csv",
-                  "n2000_r10_ord1.csv", "n200_r100_ord1.csv",
+                  "n2000_r20_ord1.csv", "n200_r100_ord1.csv",
                   "n500_r20_ord1.csv")
 
 simfiles_loop = c("n100_r100_ordAll.csv", "n250_r100_ordAll.csv")
 
 simfiles_opt2 = c("n100_r1000_ordAll_O2opt.csv", "n250_r500_ordAll_O2opt.csv",
-                  "n500_r200_ordAll_O2opt.csv", "n2000_r100_ordAll_O2opt.csv")
+                  "n500_r100_ordAll_O2opt.csv", "n1000_r50_ordAll_O2opt.csv",
+                  "n2000_r10_ordAll_O2opt.csv")
 
 simfiles_opt3 = c("n1000_r50_ordAll_O3opt.csv", "n100_r1000_ordAll_O3opt.csv",
-                  "n2000_r20_ordAll_O3opt.csv", "n250_r250_ordAll_O3opt.csv",
+                  "n2000_r10_ordAll_O3opt.csv", "n250_r250_ordAll_O3opt.csv",
                   "n500_r100_ordAll_O3opt.csv")
 
 simfiles_dgemm = c("n1000_r100_dgemm.csv", "n100_r1000_dgemm.csv",
@@ -37,8 +38,10 @@ for(fn in simfiles_ord1){
     df = read.table(fp, header=T, sep=",")
     df$fn = fn
     # remove outliers
-    # rmv.ixs = which(df$clocks > mean(df$clocks) + 4*sqrt(var(df$clocks)))
-    # df = df[-rmv.ixs,]
+    if(fn %in% simfiles_ord1[c(2,4,5)]){
+        rmv.ixs = which(df$clocks > mean(df$clocks) + 4*sqrt(var(df$clocks)))
+        df = df[-rmv.ixs,]
+    }
     df1 = rbind(df1, df)
 }
 df1 = na.omit(df1)
@@ -54,7 +57,7 @@ plt1 = ggplot(df1, aes(clocks, fill=batch)) +
     ggtitle("Timing matrix multiplication with different size matrices") +
     ylab("Frequency") + xlab("Clock cycles used") +
     scale_colour_discrete(name = "Matrix size (n by n)")
-plt1
+# plt2
 
 plt2 = ggplot(df1, aes(time, fill=batch)) +
     geom_histogram(bins=50) + geom_freqpoly(bins=50) +
@@ -62,7 +65,7 @@ plt2 = ggplot(df1, aes(time, fill=batch)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position="none") +
     ggtitle("Timing matrix multiplication with different size matrices") +
-    ylab("Frequency") + xlab("Seconds used") +
+    ylab("Frequency") + xlab("Seconds elapsed") +
     scale_colour_discrete(name = "Matrix size (n by n)")
 plt2
 
@@ -83,22 +86,23 @@ df2$batch = factor(df2$batch)
 
 # Plot matrix multiplication timing
 plt3 = ggplot(df2[df2$batch == df2$batch[1],], # use only one batch at first
-              aes(clocks, fill=loop_order)) +
+              aes(time, fill=loop_order)) +
     geom_histogram(bins=50) + geom_freqpoly(bins=50) +
     facet_wrap(~loop_order, scales="free") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position="none") +
-    ggtitle("Timing matrix multiplication with different loop orderings") +
-    ylab("Frequency") + xlab("Clock cycles used")
+    ggtitle(
+      "Timing matrix multiplication with different loop orderings (n=100)") +
+    ylab("Frequency") + xlab("Seconds elapsed")
+print(df2$batch[1])
 plt3
 
-plt4 = ggplot(df2, aes(clocks, fill=loop_order)) +
+plt4 = ggplot(df2, aes(time, fill=loop_order)) +
     geom_histogram(bins=50) +
     facet_wrap(~batch, scales="free") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          legend.position="none") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle("Timing matrix multiplication with different loop orderings") +
-    ylab("Frequency") + xlab("Clock cycles used")
+    ylab("Frequency") + xlab("Seconds elapsed")
 plt4
 
 ## @knitr PR3
@@ -107,6 +111,9 @@ for(fn in simfiles_dgemm){
     fp = paste(data_dir, fn, sep="")
     df = read.table(fp, header=T, sep=",")
     df$fn = fn
+    # remove outliers
+    rmv.ixs = which(df$clocks > mean(df$clocks) + 4*sqrt(var(df$clocks)))
+    df = df[-rmv.ixs,]
     df3 = rbind(df3, df)
 }
 df3 = na.omit(df3)
@@ -128,5 +135,5 @@ plt6 = ggplot(df3, aes(time, fill=batch)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
          legend.position="none") +
     ggtitle("Timing matrix multiplication using BLAS dgemm()") +
-    ylab("Frequency") + xlab("Seconds used")
+    ylab("Frequency") + xlab("Seconds elapsed")
 plt6
