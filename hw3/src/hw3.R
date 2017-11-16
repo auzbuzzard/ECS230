@@ -13,11 +13,11 @@ simfiles_ord1 = c("n1000_r20_ord1.csv", "n100_r1000_ord1.csv",
 
 simfiles_loop = c("n100_r100_ordAll.csv", "n250_r100_ordAll.csv")
 
-simfiles_opt2 = c("n100_r1000_ordAll_O2opt.csv", "n250_r500_ordAll_O2opt.csv",
-                  "n500_r100_ordAll_O2opt.csv", "n1000_r50_ordAll_O2opt.csv",
-                  "n2000_r10_ordAll_O2opt.csv")
+simfiles_opt2 = c( "n1000_r50_ordAll_O2opt.csv", "n100_r1000_ordAll_O2opt.csv",
+                  "n2000_r10_ordAll_O2opt.csv", "n250_r250_ordAll_O2opt.csv",
+                  "n500_r100_ordAll_O2opt.csv")
 
-simfiles_opt3 = c("n1000_r50_ordAll_O3opt.csv", "n100_r1000_ordAll_O3opt.csv",
+simfiles_opt3 = c( "n1000_r50_ordAll_O3opt.csv", "n100_r1000_ordAll_O3opt.csv",
                   "n2000_r10_ordAll_O3opt.csv", "n250_r250_ordAll_O3opt.csv",
                   "n500_r100_ordAll_O3opt.csv")
 
@@ -71,21 +71,28 @@ plt2
 
 ## @knitr PR2
 # Read data
-simfiles_pr2 = c(simfiles_loop) # , simfiles_opt2) #, simfiles_opt3)
+simfiles_pr2 = c(simfiles_loop , simfiles_opt2, simfiles_opt3)
 df2 = data.frame(clocks=NA, time=NA, loop_order=NA, fn=NA)
 for(fn in simfiles_pr2){
     fp = paste(data_dir, fn, sep="")
     df = read.table(fp, header=T, sep=",")
     df$fn = fn
+    if(fn == simfiles_loop[1]){
+        rmv.ixs = which(df$clocks > mean(df$clocks) + 4*sqrt(var(df$clocks)))
+        df = df[-rmv.ixs,]
+    }
     df2 = rbind(df2, df)
 }
 df2 = na.omit(df2)
 df2$loop_order = factor(df2$loop_order)
 df2$batch = unlist(lapply(df2$fn, get_batch))
 df2$batch = factor(df2$batch)
+df2$title = unlist(
+                lapply(strsplit(df2$fn, "_"), function(x) (paste(x[1], x[4])))
+            )
 
 # Plot matrix multiplication timing
-plt3 = ggplot(df2[df2$batch == df2$batch[1],], # use only one batch at first
+plt3 = ggplot(df2[df2$fn == df2$fn[1],],
               aes(time, fill=loop_order)) +
     geom_histogram(bins=50) + geom_freqpoly(bins=50) +
     facet_wrap(~loop_order, scales="free") +
@@ -94,12 +101,12 @@ plt3 = ggplot(df2[df2$batch == df2$batch[1],], # use only one batch at first
     ggtitle(
       "Timing matrix multiplication with different loop orderings (n=100)") +
     ylab("Frequency") + xlab("Seconds elapsed")
-print(df2$batch[1])
+
 plt3
 
 plt4 = ggplot(df2, aes(time, fill=loop_order)) +
     geom_histogram(bins=50) +
-    facet_wrap(~batch, scales="free") +
+    facet_wrap(~title, scales="free") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle("Timing matrix multiplication with different loop orderings") +
     ylab("Frequency") + xlab("Seconds elapsed")
@@ -112,8 +119,8 @@ for(fn in simfiles_dgemm){
     df = read.table(fp, header=T, sep=",")
     df$fn = fn
     # remove outliers
-    rmv.ixs = which(df$clocks > mean(df$clocks) + 4*sqrt(var(df$clocks)))
-    df = df[-rmv.ixs,]
+    # rmv.ixs = which(df$clocks > mean(df$clocks) + 4*sqrt(var(df$clocks)))
+    # df = df[-rmv.ixs,]
     df3 = rbind(df3, df)
 }
 df3 = na.omit(df3)
@@ -127,7 +134,7 @@ plt5 = ggplot(df3, aes(clocks, fill=batch)) +
           legend.position="none") +
     ggtitle("Timing matrix multiplication using BLAS dgemm()") +
     ylab("Frequency") + xlab("Clock cycles used")
-plt5
+# plt5
 
 plt6 = ggplot(df3, aes(time, fill=batch)) +
     geom_histogram(bins=50) + geom_freqpoly(bins=50) +

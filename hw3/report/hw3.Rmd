@@ -36,6 +36,7 @@ example, the green graph depicts the results of multiplying two 200 by 200
 matrices. The heights of the signals in the graphs correspond to the frequency
 of the associated timing on the x axis - for example, the algorithm typically
 required 0.002165 seconds to multiply two 100 by 100 matrices.
+  
 ```{r PR1, echo=F}
 ```
 
@@ -81,7 +82,8 @@ The loop orderings are as follows, using column-major indexing:
 5. kji
 6. kij
 
-The graphs above indicate that the $jki$ and $kji$ orderings are the fastest.
+The graphs above indicate that the $jki$ and $kji$ orderings are the fastest
+for all compiler optimization options.
 Were the implementation to use row-major rather than column-major indexing, one
 might reasonably expect the roles of $i$ and $j$ to be reversed in the rankings.
 
@@ -94,6 +96,7 @@ algorithm follow:
 
 ```{r PR3, echo=F}
 ```
+  
 One can see that, in addition to being much faster than the simple
 implementation presented in the preceeding sections, the dgemm() multiplication
 has a lower spread of results. The take-away here is that one should, in
@@ -113,11 +116,13 @@ $s = s + a_{i,k}b_{k,j}$ and the $n^3$ is due to the three embedded for loops.
 
 Hence, the performance in Gflops/sec for two 1000 by 1000 matrices using the
 BLAS dgemm function is
-$\frac{2*1000^3 flop}{0.012 sec} \approx 167*10^9 \frac{flop}{sec} =
+$\frac{2*1000^3 flop}{0.0355 sec} \approx 56*10^9 \frac{flop}{sec} =
 167 \frac{Gflop}{sec}$.
 The corresponding performance metric for the implementation presented in the
 first section on 1000 by 1000 matrices is
 $\frac{2*1000^3 flop}{3.595 sec} \approx 0.55 \frac{Gflop}{sec}$.
+Using further optimization, the BLAS dgemm() matrix multiplication subroutine
+achieves a 100x speedup over naive implementations.
 
 ### Peak performance
 The peak performance of a 4.0 GHz processor depends on a number of factors,
