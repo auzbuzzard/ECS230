@@ -1,0 +1,1 @@
+gcc -o ../bin/poly fit_polynomial.c -lblas -lm;
