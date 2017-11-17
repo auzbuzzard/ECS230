@@ -9,6 +9,7 @@
 //      StdIO - fit and intermediate results
 //
 // Sources:
+// 1. https://www.cs.bu.edu/teaching/c/file-io/intro/
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -21,9 +22,26 @@ int main(int argc, char** argv)
 {
 
 	// initialize constants and variables
-  const char data_path[] = "../data/data.dat";
+  const char data_fn[] = "../data/data.dat";
+	float x, y; // for reading x and y from data_fn
 
-	printf("%s\n", data_path);
+	printf("%s\n", data_fn);
+
+	// read data into memory from disk
+	FILE *ifp;
+	char *mode = "r";
+
+	ifp = fopen(data_fn, mode);
+
+	if (ifp == NULL) {
+	  fprintf(stderr, "Cannot open file\n");
+	  exit(1);
+	}
+
+	printf("X,\tY\n");
+	while (fscanf(ifp, "%f %f", &x, &y) != EOF) {
+	  printf("%f, %f\n", x, y);
+	}
 
   return 0;
 }
