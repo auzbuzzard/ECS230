@@ -10,6 +10,7 @@
 //
 // Sources:
 // 1. https://www.cs.bu.edu/teaching/c/file-io/intro/
+// 2. http://www.netlib.org/clapack/cblas/dgemm.c
 
 #include "stdio.h"
 #include "stdlib.h"
