@@ -17,6 +17,13 @@
 #include "Accelerate/Accelerate.h"
 // #include "cblas.h"
 
+// BEGIN PROTOTYPES
+void dgemm_(char * transa, char * transb, int * m, int * n, int * k,
+				double * alpha, double * A, int * lda,
+				double * B, int * ldb, double * beta,
+				double *, int * ldc);
+// END PROTOTYPES
+
 // BEGIN MAIN
 int main(int argc, char** argv)
 {
@@ -65,23 +72,59 @@ int main(int argc, char** argv)
 	fclose(ifp);
 
 	// print the X and Y matrices
-	printf("Y\t"); // BEGIN formatting printing header
+	printf("Y\t\t"); // BEGIN formatting printing header
 	for(j = 0; j < d; j++){
-			printf("X^%d\t", j);
+			printf("X^%d\t\t", j);
 	}
 	printf("\n"); // END formatting printing header
 
-	for(i = 0; i < n; i++){
-			printf("%.1f\t", Y[i]);
+	for(i = 0; i < n; i++){ // BEGIN print X and Y
+			printf("%f\t", Y[i]);
 			for(j = 0; j < d; j++){
-				printf("%.2f\t", X[i + j*n]);
+				printf("%f\t", X[i + j*n]);
 			}
 			printf("\n");
-	}
+	} // END print X and Y
 
+
+		// compute A=X^T X using BLAS::dgemm()
+		char TRANSA = 'T'; // transpose the matrix X for (X^T X)
+		char TRANSB = 'N';
+		double ALPHA = 1.0; // dgemm(A,B,C) : C <- alpha*AB + beta*C
+		double BETA = 0.0;
+		int M = d; // rows of X^T
+		int N = d; // columns of X
+		int K = n; // columns of X^T and rows of X
+		int LDA = n;
+		int LDB = n;
+		int LDC = n;
+
+		// allocate memory for the input data
+		double *A = (double*) malloc(d*d* sizeof(double));
+		if (A == NULL) {
+				fprintf(stderr, "malloc failed\n");
+				return(1);
+		}
+
+		// compute A = X^T X
+    dgemm_(&TRANSA, &TRANSB,
+						&M, &N, &N,
+						&ALPHA, X, &LDA, X, &LDB, &BETA,
+						A, &LDC);
+
+		// print A
+		printf("\nA\n");
+	for(i = 0; i < d; i++){
+			for(j = 0; j < d; j++){
+				printf("%f\t", A[i + j*n]);
+			}
+			printf("\n");
+	} // END print X and Y
 
 	// TODO
-	// compute A=X^T X
+	// compute X^T Y
+	// compute choelsky decomposition XTX = A = LTL i.e. get L
+	// solve for b (Y=bX) using BLAS::dtrsm()
 
   return 0;
 }
