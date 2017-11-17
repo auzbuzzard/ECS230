@@ -23,25 +23,39 @@ int main(int argc, char** argv)
 
 	// initialize constants and variables
   const char data_fn[] = "../data/data.dat";
+  int d = atoi(argv[1]); // degree of fit polynomial from commandline
 	float x, y; // for reading x and y from data_fn
-
-	printf("%s\n", data_fn);
+	int n = 0; // size of the input data (n by 2 i.e. n xs and n ys)
 
 	// read data into memory from disk
-	FILE *ifp;
+	FILE *ifp; // setup variables
 	char *mode = "r";
 
-	ifp = fopen(data_fn, mode);
+	ifp = fopen(data_fn, mode); // open file
 
 	if (ifp == NULL) {
-	  fprintf(stderr, "Cannot open file\n");
+	  fprintf(stderr, "Cannot open file\n"); // error if it can't open
 	  exit(1);
 	}
 
-	printf("X,\tY\n");
-	while (fscanf(ifp, "%f %f", &x, &y) != EOF) {
-	  printf("%f, %f\n", x, y);
+	// print input contents back out to stdIO and count lines
+	printf("X,\tY\n"); // output formatting
+	while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
+	  printf("%f, %f\n", x, y); // print the line
+		n++; // count the number of lines
 	}
+	printf("number of lines read: %d\n", n);
+
+	// allocate memory for the input data
+  double *X = (double*) malloc(n* sizeof(double));
+  double *Y = (double*) malloc(n* sizeof(double));
+  if ((X == NULL) || (Y == NULL)) {
+    fprintf(stderr, "malloc failed\n");
+    return(1);
+  }
+
+	// close the file
+	fclose(ifp);
 
   return 0;
 }
