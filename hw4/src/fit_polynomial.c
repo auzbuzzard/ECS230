@@ -30,9 +30,7 @@ int main(int argc, char** argv)
 	// read data into memory from disk
 	FILE *ifp; // setup variables
 	char *mode = "r";
-
 	ifp = fopen(data_fn, mode); // open file
-
 	if (ifp == NULL) {
 	  fprintf(stderr, "Cannot open file\n"); // error if it can't open
 	  exit(1);
@@ -44,7 +42,7 @@ int main(int argc, char** argv)
 	  printf("%f, %f\n", x, y); // print the line
 		n++; // count the number of lines
 	}
-	printf("number of lines read: %d\n", n);
+	printf("\n");
 
 	// allocate memory for the input data
   double *X = (double*) malloc(n* sizeof(double));
@@ -53,6 +51,14 @@ int main(int argc, char** argv)
     fprintf(stderr, "malloc failed\n");
     return(1);
   }
+
+	// read input data into the X and Y arrays
+	int i = 0; // loop counter
+	while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
+			X[i] = x;
+			Y[i] = y;
+			i++;
+	}
 
 	// close the file
 	fclose(ifp);
