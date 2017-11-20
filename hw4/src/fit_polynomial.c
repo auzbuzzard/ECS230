@@ -11,6 +11,7 @@
 // Sources:
 // 1. https://www.cs.bu.edu/teaching/c/file-io/intro/
 // 2. http://www.netlib.org/clapack/cblas/dgemm.c
+// 3. https://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
 
 #include "stdio.h"
 #include "stdlib.h"
