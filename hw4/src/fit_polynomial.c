@@ -210,39 +210,70 @@ int main(int argc, char** argv)
 
     // Solve for b (Xb=y) using BLAS::dtrsm()
     //  first, some algebra:
-    //  Xb = y -> XtX b = Xt y -> Ab = p -> LtL b = p
-    //  let Lb = q, then solve Lt q = p using dtrsm_()
-    //  upon solving for q, solve Lb = q for b using dtrsm_()
+    //  Xb = y -> XtX b = Xt y -> Ab = p -> LLt b = p
+    //  let Ltb = q, then solve L q = p using dtrsm_() for q
+    //  upon solving for q, solve Ltb = q for b using dtrsm_()
 
-    // set up the first triangular solve for Lt q = p and run it
-    char SIDE = 'L'; // left, i.e. Lt q = p rather than q L = p
+    // set up the first triangular solve for L Q = P and run it
+    char SIDE = 'L'; // left, i.e. L q = p rather than q L = p
     UPLO = 'L'; // L is lower triangular
-    TRANSA = 'T'; // solving Lt q = b
+    TRANSA = 'N'; // solving L q = b not Lt
     char DIAG = 'N'; // L is not unit diagonal (using Choelsky not LDL decomp)
     M = d; // rows of resultant vector P
     N = 1; // columns of resultant vector P
     ALPHA = 1.0; // coef for the rhs vector P
-    LDA = d; // leading dimension on the lhs multiplier Lt
+    LDA = d; // leading dimension on the lhs multiplier L
     LDB = d; // leading dimension of the rhs vector P
 
-    // allocate a copy of p for the solution q
+    // allocate a copy of P for the solution Q
     double *Q = (double*) malloc(d* sizeof(double));
     if (Q == NULL) {
         fprintf(stderr, "malloc failed\n");
         return(1);
     }
-    for(i=0; i<d; i++){ // copy P -> P2
+    for(i=0; i<d; i++){ // copy P -> Q
         Q[i] = P[i];
     }
 
-    dtrsm_(&SIDE, &UPLO, &TRANSA, &DIAG, // calculate Q = Lt^{-1} P
+    dtrsm_(&SIDE, &UPLO, &TRANSA, &DIAG, // calculate Q = L^{-1} P
             &M, &N, &ALPHA, L, &LDA, Q, &LDB);
 
-    // print the solution q = Lt^{-1} p
-    printf("\nQ = L^T^{-1} P\n");
+    // print the solution Q = L^{-1} P
+    printf("\nQ = L^{-1} P\n");
     for(i = 0; i < d; i++){
         printf("%f\n", Q[i]);
     }
+
+    // solve the second system
+    SIDE = 'L'; // left, i.e. Lt
+    UPLO = 'L'; // L is lower triangular
+    TRANSA = 'T'; // solving Lt b = q
+    DIAG = 'N'; // L is not unit diagonal (using Choelsky not LDL decomp)
+    M = d; // rows of rhs vector Q
+    N = 1; // columns of rhs vector Q
+    ALPHA = 1.0; // coef for the rhs vector Q
+    LDA = d; // leading dimension on the lhs multiplier Lt
+    LDB = d; // leading dimension of the rhs vector Q
+
+    // allocate a copy of Q for the solution B
+    double *B = (double*) malloc(d* sizeof(double));
+    if (B == NULL) {
+        fprintf(stderr, "malloc failed\n");
+        return(1);
+    }
+    for(i=0; i<d; i++){ // copy B <- Q; Lt B = Q
+        B[i] = Q[i]; // B is overwritten with result Lt^{-1}Q
+    }
+
+    dtrsm_(&SIDE, &UPLO, &TRANSA, &DIAG, // calculate B = Lt^{-1}Q
+            &M, &N, &ALPHA, L, &LDA, B, &LDB);
+
+    // print the solution B = Lt^{-1} Q
+    printf("\nB = L^T^{-1} Q\n");
+    for(i = 0; i < d; i++){
+        printf("%f\n", B[i]);
+    }
+
 
     // TODO
     // gnuplot the resulting fit and the raw data
