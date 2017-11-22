@@ -274,6 +274,32 @@ int main(int argc, char** argv)
         printf("%f\n", B[i]);
     }
 
+    // Generate predictions using the fitted polynomial represented by B
+    // allocate space for the predictions
+    double *Yhat = (double*) malloc(n* sizeof(double));
+    if (Yhat == NULL) {
+        fprintf(stderr, "malloc failed\n");
+        return(1);
+    }
+
+    TRANS = 'N'; // do not 'N' transpose the matrix X for (XB = yhat)
+    M = n; // X is n rows by d columns
+    N = d;
+    LDX = n; // leading dimension of X
+    ALPHA = 1.0; // coefficient for Y in Y := alpha AX + beta y
+    BETA = 0.0;
+    int INCB = 1; // increment for the vector B
+    INCY = 1; // increment for the resultant vector Yhat
+
+    dgemv_(&TRANS, &M, &N,
+        &ALPHA, X, &LDX, B, &INCB, &BETA,
+        Yhat, &INCY);
+
+    // print the solution Yhat = XB
+    printf("\nYhat = XB\n");
+    for(i = 0; i < n; i++){
+        printf("%f\n", Yhat[i]);
+    }
 
     // TODO
     // gnuplot the resulting fit and the raw data
