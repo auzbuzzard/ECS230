@@ -179,14 +179,23 @@ int main(int argc, char** argv)
     int ORD = d; // L is order d
     int LDD = d; // leading dimension of matrix
     int INFO = 0; // output for diagonalization
-    /* dpotrf_(&UPLO, &ORD, L, &LDD, &INFO); */
+    dpotrf_(&UPLO, &ORD, L, &LDD, &INFO);
 
-    // print resultant diagonalized matrix L
     if(INFO != 0){
         fprintf(stderr, "Choelsky decomosition failed\n");
         return(1);
     }
 
+    // set the above-diagonal entries to 0
+    for(i=0; i<d; i++){
+        for(j=0; j<d; j++){
+            if(j>i){
+                L[i + d*j] = 0.0;
+            }
+        }
+    }
+
+    // print resultant diagonalized matrix L
     printf("\nL = Chol(A)\n");
     for(i = 0; i < d; i++){
         for(j = 0; j < d; j++){

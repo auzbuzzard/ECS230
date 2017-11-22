@@ -1,1 +1,3 @@
-gcc -o ../bin/poly fit_polynomial.c -lblas -lm;
+gcc -o ../bin/poly fit_polynomial.c -lblas -llapack;
+
+maybe try -lm too if you run into issues
