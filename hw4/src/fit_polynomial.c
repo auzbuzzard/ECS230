@@ -126,7 +126,7 @@ int main(int argc, char** argv)
         A, &LDC);
 
     // print A
-    printf("\nA\n");
+    printf("\nA = X^T X\n");
     for(i = 0; i < d; i++){
         for(j = 0; j < d; j++){
             printf("%f\t", A[i + j*d]);
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
         P, &INCP);
 
     // print P
-    printf("\nP\n");
+    printf("\nP = X^T y\n");
     for(i = 0; i < n; i++){
         printf("%f\t", P[i]);
     printf("\n");
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
         return(1);
     }
 
-    printf("\nL\n");
+    printf("\nL = Chol(A)\n");
     for(i = 0; i < d; i++){
         for(j = 0; j < d; j++){
             printf("%f\t", L[i + j*d]);
