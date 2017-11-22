@@ -32,7 +32,11 @@ void dgemv_(char * trans, int * m, int * n,
     double * y, int * incy);
 
 int dpotrf_(char * uplo, int * n,
-        double * A, int * lda, int * info);
+    double * A, int * lda, int * info);
+
+void dtrsm_(char * side, char * uplo, char * transa, char * diag,
+    int * m, int * n, double * alpha, double * A,
+    int * lda, double * B, int * ldb);
 // END PROTOTYPES
 
 // BEGIN MAIN
@@ -134,7 +138,7 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
-    // compute A=X^T X using BLAS::dgemm()
+    // Compute P = Xt y using BLAS::dgemm()
     // initialize
     char TRANS = 'T'; // transpose the matrix X for (X^T y)
     int LDX = n;
@@ -186,7 +190,7 @@ int main(int argc, char** argv)
         return(1);
     }
 
-    // set the above-diagonal entries to 0
+    // set the above-diagonal entries to 0 - this is just an aesthetic thing
     for(i=0; i<d; i++){
         for(j=0; j<d; j++){
             if(j>i){
@@ -204,8 +208,44 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    // Solve for b (Xb=y) using BLAS::dtrsm()
+    //  first, some algebra:
+    //  Xb = y -> XtX b = Xt y -> Ab = p -> LtL b = p
+    //  let Lb = q, then solve Lt q = p using dtrsm_()
+    //  upon solving for q, solve Lb = q for b using dtrsm_()
+
+    // set up the first triangular solve for Lt q = p and run it
+    char SIDE = 'L'; // left, i.e. Lt q = p rather than q L = p
+    UPLO = 'L'; // L is lower triangular
+    TRANSA = 'T'; // solving Lt q = b
+    char DIAG = 'N'; // L is not unit diagonal (using Choelsky not LDL decomp)
+    M = d; // rows of resultant vector P
+    N = 1; // columns of resultant vector P
+    ALPHA = 1.0; // coef for the rhs vector P
+    LDA = d; // leading dimension on the lhs multiplier Lt
+    LDB = d; // leading dimension of the rhs vector P
+
+    // allocate a copy of p for the solution q
+    double *Q = (double*) malloc(d* sizeof(double));
+    if (Q == NULL) {
+        fprintf(stderr, "malloc failed\n");
+        return(1);
+    }
+    for(i=0; i<d; i++){ // copy P -> P2
+        Q[i] = P[i];
+    }
+
+    dtrsm_(&SIDE, &UPLO, &TRANSA, &DIAG, // calculate Q = Lt^{-1} P
+            &M, &N, &ALPHA, L, &LDA, Q, &LDB);
+
+    // print the solution q = Lt^{-1} p
+    printf("\nQ = L^T^{-1} P\n");
+    for(i = 0; i < d; i++){
+        printf("%f\n", Q[i]);
+    }
+
     // TODO
-    // solve for b (Y=bX) using BLAS::dtrsm()
+    // gnuplot the resulting fit and the raw data
 
     return 0;
 }
