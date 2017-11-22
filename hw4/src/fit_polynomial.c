@@ -110,7 +110,7 @@ int main(int argc, char** argv)
     int K = n; // columns of X^T and rows of X
     int LDA = n;
     int LDB = n;
-    int LDC = n;
+    int LDC = d;
 
     // allocate memory for A
     double *A = (double*) malloc(d*d* sizeof(double));
@@ -129,10 +129,10 @@ int main(int argc, char** argv)
     printf("\nA\n");
     for(i = 0; i < d; i++){
         for(j = 0; j < d; j++){
-            printf("%f\t", A[i + j*n]);
+            printf("%f\t", A[i + j*d]);
         }
-    printf("\n");
-    } // END print X and Y
+        printf("\n");
+    }
 
     // compute A=X^T X using BLAS::dgemm()
     // initialize
@@ -161,9 +161,41 @@ int main(int argc, char** argv)
     printf("\n");
     }
 
+    // Compute Choelsky decomposition XTX = A = LTL i.e. get L
+    // allocate memory for L
+    double *L = (double*) malloc(d*d* sizeof(double));
+    if (L == NULL) {
+        fprintf(stderr, "malloc failed\n");
+        return(1);
+    }
+
+    // set up L = A for subsequent diagonalization
+    for(i=0; i<d*d; i++){
+        L[i] = A[i];
+    }
+
+    // set up the diagonalization and run it
+    char UPLO = 'L'; // lower triangular
+    int ORD = d; // L is order d
+    int LDD = d; // leading dimension of matrix
+    int INFO = 0; // output for diagonalization
+    /* dpotrf_(&UPLO, &ORD, L, &LDD, &INFO); */
+
+    // print resultant diagonalized matrix L
+    if(INFO != 0){
+        fprintf(stderr, "Choelsky decomosition failed\n");
+        return(1);
+    }
+
+    printf("\nL\n");
+    for(i = 0; i < d; i++){
+        for(j = 0; j < d; j++){
+            printf("%f\t", L[i + j*d]);
+        }
+        printf("\n");
+    }
 
     // TODO
-    // compute choelsky decomposition XTX = A = LTL i.e. get L
     // solve for b (Y=bX) using BLAS::dtrsm()
 
     return 0;
