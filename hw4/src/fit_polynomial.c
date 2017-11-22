@@ -12,6 +12,7 @@
 // 1. https://www.cs.bu.edu/teaching/c/file-io/intro/
 // 2. http://www.netlib.org/clapack/cblas/dgemm.c
 // 3. https://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
+// 4  http://www.math.utah.edu/software/lapack/lapack-d/dpotrf.html
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -24,6 +25,14 @@ void dgemm_(char * transa, char * transb, int * m, int * n, int * k,
     double * alpha, double * A, int * lda,
     double * B, int * ldb, double * beta,
     double *, int * ldc);
+
+void dgemv_(char * trans, int * m, int * n,
+    double * alpha, double * A, int * lda,
+    double * x, int * incx, double * beta,
+    double * y, int * incy);
+
+int dpotrf_(char * uplo, int * n,
+        double * A, int * lda, int * info);
 // END PROTOTYPES
 
 // BEGIN MAIN
@@ -91,6 +100,7 @@ int main(int argc, char** argv)
 
 
     // compute A=X^T X using BLAS::dgemm()
+    // initialize
     char TRANSA = 'T'; // transpose the matrix X for (X^T X)
     char TRANSB = 'N';
     double ALPHA = 1.0; // dgemm(A,B,C) : C <- alpha*AB + beta*C
@@ -102,7 +112,7 @@ int main(int argc, char** argv)
     int LDB = n;
     int LDC = n;
 
-    // allocate memory for the input data
+    // allocate memory for A
     double *A = (double*) malloc(d*d* sizeof(double));
     if (A == NULL) {
         fprintf(stderr, "malloc failed\n");
@@ -124,9 +134,35 @@ int main(int argc, char** argv)
     printf("\n");
     } // END print X and Y
 
+    // compute A=X^T X using BLAS::dgemm()
+    // initialize
+    char TRANS = 'T'; // transpose the matrix X for (X^T y)
+    int LDX = n;
+    int INCY = 1; // increment for the input vector
+    int INCP = 1; // increment for the input vector
+
+    // allocate memory for P = X^T y
+    double *P = (double*) malloc(d*1* sizeof(double));
+    if (P == NULL) {
+        fprintf(stderr, "malloc failed\n");
+        return(1);
+    }
+
+    // compute P = X^T y using dgemv
+    dgemv_(&TRANS,
+        &M, &K,
+        &ALPHA, X, &LDX, Y, &INCY, &BETA,
+        P, &INCP);
+
+    // print P
+    printf("\nP\n");
+    for(i = 0; i < n; i++){
+        printf("%f\t", P[i]);
+    printf("\n");
+    }
+
+
     // TODO
-    // check that A is computed correctly
-    // compute X^T Y
     // compute choelsky decomposition XTX = A = LTL i.e. get L
     // solve for b (Y=bX) using BLAS::dtrsm()
 
