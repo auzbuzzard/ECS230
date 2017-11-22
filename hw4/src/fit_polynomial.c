@@ -13,6 +13,7 @@
 // 2. http://www.netlib.org/clapack/cblas/dgemm.c
 // 3. https://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
 // 4  http://www.math.utah.edu/software/lapack/lapack-d/dpotrf.html
+// 5. https://stackoverflow.com/questions/3521209/making-c-code-plot-a-graph-automatically
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -46,6 +47,8 @@ int main(int argc, char** argv)
     // initialize constants and variables
     /* const char data_fn[] = "../data/data.dat"; */
     const char data_fn[] = "../data/test.dat";
+    // TODO implment output and temporary file specification
+    /* const char output_fn[] = "../data/test_fit.dat"; */
     int d = atoi(argv[1]); // degree of fit polynomial from commandline
     float x, y; // for reading x and y from data_fn
     int n = 0; // size of the input data (n by 2 i.e. n xs and n ys)
@@ -303,6 +306,22 @@ int main(int argc, char** argv)
 
     // TODO
     // gnuplot the resulting fit and the raw data
+    FILE * gnuplotPipe = popen("gnuplot --persist", "w");
+    // --persist keeps plot after program termination
+    /* fprintf(gnuplotPipe, "set terminal png\n"); */
+    fprintf(gnuplotPipe, "set terminal dumb\n");
+    /* fprintf(gnuplotPipe, "set output 'fitted_plot.png'\n"); */
+    fprintf(gnuplotPipe, "plot '-' \n");
+    printf("\nPlotting results...\n\nX\tY\n");
+    for (i=0; i < n; i++) { // send the raw data to the plotting app
+        fprintf(gnuplotPipe, "%lf %lf\n", X[i + n], Y[i]);
+        printf("%lf\t%lf\n", X[i + n], Y[i]);
+    }
+    /* fprintf(gnuplotPipe, "e"); */
+    pclose(gnuplotPipe);
+
+    // TODO
+    // Write output to csv's for subsequent analysis
 
     return 0;
 }
