@@ -142,6 +142,8 @@ int main(int argc, char** argv)
     // Compute P = Xt y using BLAS::dgemm()
     // initialize
     char TRANS = 'T'; // transpose the matrix X for (X^T y)
+    M = n; // rows of X (number of obs)
+    N = d; // columns of X (degree of polynom)
     int LDX = n;
     int INCY = 1; // increment for the input vector
     int INCP = 1; // increment for the input vector
@@ -154,8 +156,7 @@ int main(int argc, char** argv)
     }
 
     // compute P = X^T y using dgemv
-    dgemv_(&TRANS,
-        &M, &K,
+    dgemv_(&TRANS, &M, &N,
         &ALPHA, X, &LDX, Y, &INCY, &BETA,
         P, &INCP);
 
