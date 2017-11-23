@@ -1,3 +1,6 @@
 AUTHOR: Eric Kalosa-Kenyon
 
 This project addresses efficient methods for least squares polynomial fitting.
+
+To compile the program, execute the following command:
+    gcc -o ../bin/poly fit_polynomial.c -lblas -llapack;
