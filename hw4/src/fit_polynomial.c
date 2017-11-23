@@ -324,14 +324,30 @@ int main(int argc, char** argv)
     fclose(out_coef);
     fclose(out_designMx);
 
-    // Gnuplot the resulting fit and the raw data
+    // Calculate R^2
+    double mu = 0.0;
+    double sse = 0.0;
+    double var = 0.0;
+    double r;
+    for(i=0; i<n; i++){
+        mu += Y[i]/n;
+        sse += pow((Yhat[i] - Y[i]), 2);
+    }
+    for(i=0; i<n; i++){
+        var += pow((Y[i] - mu), 2);
+    }
+    r = 1.0 - sse/var;
 
+    // Gnuplot the resulting fit and the raw data
     FILE * gnuplotPipe = popen("gnuplot", "w");
     fprintf(gnuplotPipe, "set terminal jpeg\n");
     fprintf(gnuplotPipe, "set output 'plot.jpeg'\n");
 
     fprintf(gnuplotPipe, "set grid\n" );
-    fprintf(gnuplotPipe, "set title 'Raw observations and fitted polynomial'\n" );
+    fprintf(gnuplotPipe,
+        "set title 'Observed data and polynomial fit (d=%d, R2=%f)'\n",
+        d, r);
+    fprintf(gnuplotPipe, "set key left box\n" );
     fprintf(gnuplotPipe, "set xlabel 'X'\n" );
     fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
     fprintf(gnuplotPipe, "set style data points\n" );
