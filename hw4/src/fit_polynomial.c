@@ -40,20 +40,56 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
     int * lda, double * B, int * ldb);
 // END PROTOTYPES
 
+// BEGIN VARIABLES
+// for general configuration
+const char data_fn[] = "../data/data.dat"; // location of the input data
+int dmax = 4, dmin = 3; // degree of fit polynomial from commandline
+int d; // counter for the degree of the polynomial to fit
+int i, j; // loop counters
+float x, y; // for reading x and y from data_fn
+int n; // size of the input data (n by 2 i.e. n xs and n ys)
+
+// file handling objects
+FILE *ifp; // pointer to the file object containing the input data
+FILE * out_raw;
+FILE * out_fit;
+FILE * out_coef;
+FILE * out_designMx;
+FILE * gnuplotPipe;
+char *mode = "r"; // opening mode for the file above
+
+// CBLAS/LAPACK inputs
+char TRANSA;
+char TRANSB;
+char TRANS;
+double ALPHA;
+double BETA;
+int M;
+int N;
+int K;
+int LDA;
+int LDB;
+int LDC;
+int INCB;
+int INCY;
+int INCP;
+char SIDE;
+char DIAG;
+
+// stats calculations
+double mu;
+double sse;
+double var;
+double r;
+// END VARIABLES
+
 // BEGIN MAIN
 int main(int argc, char** argv)
 {
 
-    // initialize constants and variables
-    const char data_fn[] = "../data/data.dat";
-    /* const char data_fn[] = "../data/test.dat"; */
-    int d = atoi(argv[1]); // degree of fit polynomial from commandline
-    float x, y; // for reading x and y from data_fn
-    int n = 0; // size of the input data (n by 2 i.e. n xs and n ys)
+    for(d=dmin; d<dmax+1; d++){
 
     // read data into memory from disk
-    FILE *ifp; // setup variables
-    char *mode = "r";
     ifp = fopen(data_fn, mode);
     if (ifp == NULL) {
         fprintf(stderr, "Cannot open file\n"); // error if it can't open
@@ -61,13 +97,14 @@ int main(int argc, char** argv)
     }
 
     // print input contents back out to stdIO and count lines
+    n = 0;
     while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
         n++; // count the number of lines
     }
     fclose(ifp);
 
     // allocate memory for the input data
-    double *X = (double*) malloc(n*d* sizeof(double));
+    double *X = (double*) malloc(n*dmax* sizeof(double));
     // NOTE: X is col-major indexed i.e. X[i + n*j] = X_(i,j)
     double *Y = (double*) malloc(n* sizeof(double));
     if ((X == NULL) || (Y == NULL)) {
@@ -76,10 +113,10 @@ int main(int argc, char** argv)
     }
 
     // read input data into the X and Y arrays
-    int i = 0, j = 0; // loop counter
     ifp = fopen(data_fn, mode);
+    i = 0;
     while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
-        for(j = 0; j < d+1; j++){
+        for(j = 0; j < dmax+1; j++){
             X[i + j*n] = pow(x, j); // each col of X is ((x_i)^j)_{i=1..n}, j<=d
         }
         Y[i] = y;
@@ -106,16 +143,16 @@ int main(int argc, char** argv)
 
     // compute A=X^T X using BLAS::dgemm()
     // initialize
-    char TRANSA = 'T'; // transpose the matrix X for (X^T X)
-    char TRANSB = 'N';
-    double ALPHA = 1.0; // dgemm(A,B,C) : C <- alpha*AB + beta*C
-    double BETA = 0.0;
-    int M = d; // rows of X^T
-    int N = d; // columns of X
-    int K = n; // columns of X^T and rows of X
-    int LDA = n;
-    int LDB = n;
-    int LDC = d;
+    TRANSA = 'T'; // transpose the matrix X for (X^T X)
+    TRANSB = 'N';
+    ALPHA = 1.0; // dgemm(A,B,C) : C <- alpha*AB + beta*C
+    BETA = 0.0;
+    M = d; // rows of X^T
+    N = d; // columns of X
+    K = n; // columns of X^T and rows of X
+    LDA = n; // leading dimension of X
+    LDB = n; // leading dimension of X
+    LDC = d; // leading dimension of A
 
     // allocate memory for A
     double *A = (double*) malloc(d*d* sizeof(double));
@@ -141,12 +178,12 @@ int main(int argc, char** argv)
 
     // Compute P = Xt y using BLAS::dgemm()
     // initialize
-    char TRANS = 'T'; // transpose the matrix X for (X^T y)
+    TRANS = 'T'; // transpose the matrix X for (X^T y)
     M = n; // rows of X (number of obs)
     N = d; // columns of X (degree of polynom)
-    int LDX = n;
-    int INCY = 1; // increment for the input vector
-    int INCP = 1; // increment for the input vector
+    LDA = n; // leading dimension of X
+    INCY = 1; // increment for the input vector
+    INCP = 1; // increment for the input vector
 
     // allocate memory for P = X^T y
     double *P = (double*) malloc(d* sizeof(double));
@@ -157,7 +194,7 @@ int main(int argc, char** argv)
 
     // compute P = X^T y using dgemv
     dgemv_(&TRANS, &M, &N,
-        &ALPHA, X, &LDX, Y, &INCY, &BETA,
+        &ALPHA, X, &LDA, Y, &INCY, &BETA,
         P, &INCP);
 
     // print P
@@ -217,10 +254,10 @@ int main(int argc, char** argv)
     //  upon solving for q, solve Ltb = q for b using dtrsm_()
 
     // set up the first triangular solve for L Q = P and run it
-    char SIDE = 'L'; // left, i.e. L q = p rather than q L = p
+    SIDE = 'L'; // left, i.e. L q = p rather than q L = p
     UPLO = 'L'; // L is lower triangular
     TRANSA = 'N'; // solving L q = b not Lt
-    char DIAG = 'N'; // L is not unit diagonal (using Choelsky not LDL decomp)
+    DIAG = 'N'; // L is not unit diagonal (using Choelsky not LDL decomp)
     M = d; // rows of resultant vector P
     N = 1; // columns of resultant vector P
     ALPHA = 1.0; // coef for the rhs vector P
@@ -287,14 +324,14 @@ int main(int argc, char** argv)
     TRANS = 'N'; // do not 'N' transpose the matrix X for (XB = yhat)
     M = n; // X is n rows by d columns
     N = d;
-    LDX = n; // leading dimension of X
+    LDA = n; // leading dimension of X
     ALPHA = 1.0; // coefficient for Y in Y := alpha AX + beta y
     BETA = 0.0;
-    int INCB = 1; // increment for the vector B
+    INCB = 1; // increment for the vector B
     INCY = 1; // increment for the resultant vector Yhat
 
     dgemv_(&TRANS, &M, &N,
-        &ALPHA, X, &LDX, B, &INCB, &BETA,
+        &ALPHA, X, &LDA, B, &INCB, &BETA,
         Yhat, &INCY);
 
     // print the solution Yhat = XB
@@ -304,10 +341,10 @@ int main(int argc, char** argv)
     }
 
     // Write output to disk for subsequent analysis
-    FILE * out_raw = fopen("../report/poly_raw.dat", "w");
-    FILE * out_fit = fopen("../report/poly_fit.dat", "w");
-    FILE * out_coef = fopen("../report/poly_coef.dat", "w");
-    FILE * out_designMx = fopen("../report/poly_designMx.dat", "w");
+    out_raw = fopen("../report/poly_raw.dat", "w");
+    out_fit = fopen("../report/poly_fit.dat", "w");
+    out_coef = fopen("../report/poly_coef.dat", "w");
+    out_designMx = fopen("../report/poly_designMx.dat", "w");
     for (i=0; i < n; i++) {
         fprintf(out_raw, "%lf %lf\n", X[i + n], Y[i]);
         fprintf(out_fit, "%lf %lf\n", X[i + n], Yhat[i]);
@@ -325,10 +362,10 @@ int main(int argc, char** argv)
     fclose(out_designMx);
 
     // Calculate R^2
-    double mu = 0.0;
-    double sse = 0.0;
-    double var = 0.0;
-    double r;
+    mu = 0.0;
+    sse = 0.0;
+    var = 0.0;
+
     for(i=0; i<n; i++){
         mu += Y[i]/n;
         sse += pow((Yhat[i] - Y[i]), 2);
@@ -339,7 +376,7 @@ int main(int argc, char** argv)
     r = 1.0 - sse/var;
 
     // Gnuplot the resulting fit and the raw data
-    FILE * gnuplotPipe = popen("gnuplot", "w");
+    gnuplotPipe = popen("gnuplot", "w");
     fprintf(gnuplotPipe, "set terminal jpeg\n");
     fprintf(gnuplotPipe, "set output '../report/plot.jpeg'\n");
 
@@ -356,6 +393,18 @@ int main(int argc, char** argv)
     fprintf(gnuplotPipe, "'../report/poly_fit.dat' title 'Fit'\n");
 
     pclose(gnuplotPipe);
+
+    // Cleanup the matrices
+    free(A);
+    free(B);
+    free(X);
+    free(Y);
+    free(P);
+    free(Q);
+    free(L);
+    free(Yhat);
+
+    } // END polynomial degree loop (d)
 
     return 0;
 }
