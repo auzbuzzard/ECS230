@@ -45,8 +45,8 @@ int main(int argc, char** argv)
 {
 
     // initialize constants and variables
-    /* const char data_fn[] = "../data/data.dat"; */
-    const char data_fn[] = "../data/test.dat";
+    const char data_fn[] = "../data/data.dat";
+    /* const char data_fn[] = "../data/test.dat"; */
     int d = atoi(argv[1]); // degree of fit polynomial from commandline
     float x, y; // for reading x and y from data_fn
     int n = 0; // size of the input data (n by 2 i.e. n xs and n ys)
@@ -322,6 +322,7 @@ int main(int argc, char** argv)
     fclose(out_raw);
     fclose(out_fit);
     fclose(out_coef);
+    fclose(out_designMx);
 
     // Gnuplot the resulting fit and the raw data
 
