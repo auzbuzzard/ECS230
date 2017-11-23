@@ -126,7 +126,7 @@ int main(int argc, char** argv)
 
     // compute A = X^T X
     dgemm_(&TRANSA, &TRANSB,
-        &M, &N, &N,
+        &M, &N, &K,
         &ALPHA, X, &LDA, X, &LDB, &BETA,
         A, &LDC);
 
