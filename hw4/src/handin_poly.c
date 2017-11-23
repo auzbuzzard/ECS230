@@ -18,8 +18,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
-#include "Accelerate/Accelerate.h"
-// #include "cblas.h"
+#include "cblas.h"
 
 // BEGIN PROTOTYPES
 void dgemm_(char * transa, char * transb, int * m, int * n, int * k,
