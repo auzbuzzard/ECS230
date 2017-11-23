@@ -304,10 +304,10 @@ int main(int argc, char** argv)
     }
 
     // Write output to disk for subsequent analysis
-    FILE * out_raw = fopen("poly_raw.dat", "w");
-    FILE * out_fit = fopen("poly_fit.dat", "w");
-    FILE * out_coef = fopen("poly_coef.dat", "w");
-    FILE * out_designMx = fopen("poly_designMx.dat", "w");
+    FILE * out_raw = fopen("../report/poly_raw.dat", "w");
+    FILE * out_fit = fopen("../report/poly_fit.dat", "w");
+    FILE * out_coef = fopen("../report/poly_coef.dat", "w");
+    FILE * out_designMx = fopen("../report/poly_designMx.dat", "w");
     for (i=0; i < n; i++) {
         fprintf(out_raw, "%lf %lf\n", X[i + n], Y[i]);
         fprintf(out_fit, "%lf %lf\n", X[i + n], Yhat[i]);
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
     // Gnuplot the resulting fit and the raw data
     FILE * gnuplotPipe = popen("gnuplot", "w");
     fprintf(gnuplotPipe, "set terminal jpeg\n");
-    fprintf(gnuplotPipe, "set output 'plot.jpeg'\n");
+    fprintf(gnuplotPipe, "set output '../report/plot.jpeg'\n");
 
     fprintf(gnuplotPipe, "set grid\n" );
     fprintf(gnuplotPipe,
@@ -352,8 +352,8 @@ int main(int argc, char** argv)
     fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
     fprintf(gnuplotPipe, "set style data points\n" );
     fprintf(gnuplotPipe, "set pointsize 2\n" );
-    fprintf(gnuplotPipe, "plot 'poly_raw.dat' title 'Input', ");
-    fprintf(gnuplotPipe, "'poly_fit.dat' title 'Fit'\n");
+    fprintf(gnuplotPipe, "plot '../report/poly_raw.dat' title 'Input', ");
+    fprintf(gnuplotPipe, "'../report/poly_fit.dat' title 'Fit'\n");
 
     pclose(gnuplotPipe);
 
