@@ -43,11 +43,11 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 // BEGIN VARIABLES
 // for general configuration
 const char data_fn[] = "../data/data.dat"; // location of the input data
-int dmax = 4, dmin = 3; // degree of fit polynomial from commandline
 int d; // counter for the degree of the polynomial to fit
 int i, j; // loop counters
 float x, y; // for reading x and y from data_fn
 int n; // size of the input data (n by 2 i.e. n xs and n ys)
+char string[1024]; // target string for snprintf()
 
 // file handling objects
 FILE *ifp; // pointer to the file object containing the input data
@@ -86,8 +86,7 @@ double r;
 // BEGIN MAIN
 int main(int argc, char** argv)
 {
-
-    for(d=dmin; d<dmax+1; d++){
+    d = atoi(argv[1]); // degree of fit polynomial from commandline
 
     // read data into memory from disk
     ifp = fopen(data_fn, mode);
@@ -104,7 +103,7 @@ int main(int argc, char** argv)
     fclose(ifp);
 
     // allocate memory for the input data
-    double *X = (double*) malloc(n*dmax* sizeof(double));
+    double *X = (double*) malloc(n*d* sizeof(double));
     // NOTE: X is col-major indexed i.e. X[i + n*j] = X_(i,j)
     double *Y = (double*) malloc(n* sizeof(double));
     if ((X == NULL) || (Y == NULL)) {
@@ -116,11 +115,10 @@ int main(int argc, char** argv)
     ifp = fopen(data_fn, mode);
     i = 0;
     while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
-        for(j = 0; j < dmax+1; j++){
+        for(j = 0; j < d+1; j++){
             X[i + j*n] = pow(x, j); // each col of X is ((x_i)^j)_{i=1..n}, j<=d
         }
         Y[i] = y;
-        /* printf("x=%f,\ty=%f\n", x, y); */
         i++;
     }
     fclose(ifp);
@@ -341,10 +339,14 @@ int main(int argc, char** argv)
     }
 
     // Write output to disk for subsequent analysis
-    out_raw = fopen("../report/poly_raw.dat", "w");
-    out_fit = fopen("../report/poly_fit.dat", "w");
-    out_coef = fopen("../report/poly_coef.dat", "w");
-    out_designMx = fopen("../report/poly_designMx.dat", "w");
+    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_raw_", d, ".dat");
+    out_raw = fopen(string, "w");
+    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_fit_", d, ".dat");
+    out_fit = fopen(string, "w");
+    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_coef_", d, ".dat");
+    out_coef = fopen(string, "w");
+    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_designMx_", d, ".dat");
+    out_designMx = fopen(string, "w");
     for (i=0; i < n; i++) {
         fprintf(out_raw, "%lf %lf\n", X[i + n], Y[i]);
         fprintf(out_fit, "%lf %lf\n", X[i + n], Yhat[i]);
@@ -378,7 +380,7 @@ int main(int argc, char** argv)
     // Gnuplot the resulting fit and the raw data
     gnuplotPipe = popen("gnuplot", "w");
     fprintf(gnuplotPipe, "set terminal jpeg\n");
-    fprintf(gnuplotPipe, "set output '../report/plot.jpeg'\n");
+    fprintf(gnuplotPipe, "set output '../report/plot_%d.jpeg'\n", d);
 
     fprintf(gnuplotPipe, "set grid\n" );
     fprintf(gnuplotPipe,
@@ -389,22 +391,10 @@ int main(int argc, char** argv)
     fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
     fprintf(gnuplotPipe, "set style data points\n" );
     fprintf(gnuplotPipe, "set pointsize 2\n" );
-    fprintf(gnuplotPipe, "plot '../report/poly_raw.dat' title 'Input', ");
-    fprintf(gnuplotPipe, "'../report/poly_fit.dat' title 'Fit'\n");
+    fprintf(gnuplotPipe, "plot '%s' title 'Input', ", data_fn);
+    fprintf(gnuplotPipe, "'../report/poly_fit_%d.dat' title 'Fit'\n", d);
 
     pclose(gnuplotPipe);
-
-    // Cleanup the matrices
-    free(A);
-    free(B);
-    free(X);
-    free(Y);
-    free(P);
-    free(Q);
-    free(L);
-    free(Yhat);
-
-    } // END polynomial degree loop (d)
 
     return 0;
 }
