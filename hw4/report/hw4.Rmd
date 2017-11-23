@@ -1,0 +1,34 @@
+---
+title: "ECS230 Hw4"
+author:
+- Eric Kalosa-Kenyon
+date: "`r format(Sys.time(), '%d %B %Y')`"
+
+abstract: In this assignment, I fit polynomials to data using LAPACK/BLAS matrix functions.
+
+output:
+  html_document:
+    toc: yes
+    smart: false
+---
+
+# Fitting a polynomial
+
+```{r, echo=F}
+library("knitr")
+read_chunk("../src/hw4.R")
+```
+
+```{r SETUP, echo=F}
+```
+
+# Source code
+The following is the source used for the creation of this report. The code
+handed in on the CSIF computers is slightly different from the following source.
+The hand-in code conforms to the specifications of the assignment, wheras the
+following source is formatted to work with the project's directory structure. No
+major algorithmic changes were made.
+
+```{r engine='bash', comment='', echo=F}
+cat ../src/fit_polynomial.c
+```
