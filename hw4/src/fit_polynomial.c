@@ -47,8 +47,6 @@ int main(int argc, char** argv)
     // initialize constants and variables
     /* const char data_fn[] = "../data/data.dat"; */
     const char data_fn[] = "../data/test.dat";
-    // TODO implment output and temporary file specification
-    /* const char output_fn[] = "../data/test_fit.dat"; */
     int d = atoi(argv[1]); // degree of fit polynomial from commandline
     float x, y; // for reading x and y from data_fn
     int n = 0; // size of the input data (n by 2 i.e. n xs and n ys)
@@ -149,7 +147,7 @@ int main(int argc, char** argv)
     int INCP = 1; // increment for the input vector
 
     // allocate memory for P = X^T y
-    double *P = (double*) malloc(d*1* sizeof(double));
+    double *P = (double*) malloc(d* sizeof(double));
     if (P == NULL) {
         fprintf(stderr, "malloc failed\n");
         return(1);
@@ -163,7 +161,7 @@ int main(int argc, char** argv)
 
     // print P
     printf("\nP = X^T y\n");
-    for(i = 0; i < n; i++){
+    for(i = 0; i < d; i++){
         printf("%f\t", P[i]);
     printf("\n");
     }
@@ -308,9 +306,14 @@ int main(int argc, char** argv)
     FILE * out_raw = fopen("poly_raw.dat", "w");
     FILE * out_fit = fopen("poly_fit.dat", "w");
     FILE * out_coef = fopen("poly_coef.dat", "w");
+    FILE * out_designMx = fopen("poly_designMx.dat", "w");
     for (i=0; i < n; i++) {
         fprintf(out_raw, "%lf %lf\n", X[i + n], Y[i]);
         fprintf(out_fit, "%lf %lf\n", X[i + n], Yhat[i]);
+        for(j=0; j<d; j++){
+            fprintf(out_designMx, "%lf ", X[i + j*n]);
+        }
+        fprintf(out_designMx, "\n");
     }
     for (i=0; i < d; i++){
         fprintf(out_coef, "%lf\n", B[i]);
@@ -321,28 +324,19 @@ int main(int argc, char** argv)
 
     // Gnuplot the resulting fit and the raw data
 
-    // initialize the pipe and plotting environment
     FILE * gnuplotPipe = popen("gnuplot", "w");
-    // --persist keeps plot after program termination
-    /* fprintf(gnuplotPipe, "set terminal dumb\n"); // ascii art */
     fprintf(gnuplotPipe, "set terminal jpeg\n");
     fprintf(gnuplotPipe, "set output 'plot.jpeg'\n");
 
-    // TODO
-    // Plot also the predictions, pretty up the graph, etc.
-    fprintf(gnuplotPipe, "set style data lines\n" );
+    fprintf(gnuplotPipe, "set grid\n" );
     fprintf(gnuplotPipe, "set title 'Raw observations and fitted polynomial'\n" );
     fprintf(gnuplotPipe, "set xlabel 'X'\n" );
     fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
-    fprintf(gnuplotPipe, "plot '-'\n");
-    printf("\nPlotting results...\n"); // TODO show where it's being written
-    for (i=0; i < n; i++) { // send the raw data to the plotting app
-        fprintf(gnuplotPipe, "%lf %lf\n", X[i + n], Y[i]);
-    }
-    fprintf(gnuplotPipe, "replot '-'\n");
-    for (i=0; i < n; i++) { // send the regression data to the plotting app
-        fprintf(gnuplotPipe, "%lf %lf\n", X[i + n], Yhat[i]);
-    }
+    fprintf(gnuplotPipe, "set style data points\n" );
+    fprintf(gnuplotPipe, "set pointsize 2\n" );
+    fprintf(gnuplotPipe, "plot 'poly_raw.dat' title 'Input', ");
+    fprintf(gnuplotPipe, "'poly_fit.dat' title 'Fit'\n");
+
     pclose(gnuplotPipe);
 
     return 0;
