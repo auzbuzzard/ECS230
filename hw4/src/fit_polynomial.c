@@ -304,24 +304,46 @@ int main(int argc, char** argv)
         printf("%f\n", Yhat[i]);
     }
 
-    // TODO
-    // gnuplot the resulting fit and the raw data
-    FILE * gnuplotPipe = popen("gnuplot --persist", "w");
-    // --persist keeps plot after program termination
-    /* fprintf(gnuplotPipe, "set terminal png\n"); */
-    fprintf(gnuplotPipe, "set terminal dumb\n");
-    /* fprintf(gnuplotPipe, "set output 'fitted_plot.png'\n"); */
-    fprintf(gnuplotPipe, "plot '-' \n");
-    printf("\nPlotting results...\n\nX\tY\n");
-    for (i=0; i < n; i++) { // send the raw data to the plotting app
-        fprintf(gnuplotPipe, "%lf %lf\n", X[i + n], Y[i]);
-        printf("%lf\t%lf\n", X[i + n], Y[i]);
+    // Write output to disk for subsequent analysis
+    FILE * out_raw = fopen("poly_raw.dat", "w");
+    FILE * out_fit = fopen("poly_fit.dat", "w");
+    FILE * out_coef = fopen("poly_coef.dat", "w");
+    for (i=0; i < n; i++) {
+        fprintf(out_raw, "%lf %lf\n", X[i + n], Y[i]);
+        fprintf(out_fit, "%lf %lf\n", X[i + n], Yhat[i]);
     }
-    /* fprintf(gnuplotPipe, "e"); */
-    pclose(gnuplotPipe);
+    for (i=0; i < d; i++){
+        fprintf(out_coef, "%lf\n", B[i]);
+    }
+    fclose(out_raw);
+    fclose(out_fit);
+    fclose(out_coef);
+
+    // Gnuplot the resulting fit and the raw data
+
+    // initialize the pipe and plotting environment
+    FILE * gnuplotPipe = popen("gnuplot", "w");
+    // --persist keeps plot after program termination
+    /* fprintf(gnuplotPipe, "set terminal dumb\n"); // ascii art */
+    fprintf(gnuplotPipe, "set terminal jpeg\n");
+    fprintf(gnuplotPipe, "set output 'plot.jpeg'\n");
 
     // TODO
-    // Write output to csv's for subsequent analysis
+    // Plot also the predictions, pretty up the graph, etc.
+    fprintf(gnuplotPipe, "set style data lines\n" );
+    fprintf(gnuplotPipe, "set title 'Raw observations and fitted polynomial'\n" );
+    fprintf(gnuplotPipe, "set xlabel 'X'\n" );
+    fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
+    fprintf(gnuplotPipe, "plot '-'\n");
+    printf("\nPlotting results...\n"); // TODO show where it's being written
+    for (i=0; i < n; i++) { // send the raw data to the plotting app
+        fprintf(gnuplotPipe, "%lf %lf\n", X[i + n], Y[i]);
+    }
+    fprintf(gnuplotPipe, "replot '-'\n");
+    for (i=0; i < n; i++) { // send the regression data to the plotting app
+        fprintf(gnuplotPipe, "%lf %lf\n", X[i + n], Yhat[i]);
+    }
+    pclose(gnuplotPipe);
 
     return 0;
 }
