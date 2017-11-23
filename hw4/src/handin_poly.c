@@ -351,8 +351,8 @@ int main(int argc, char** argv)
     fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
     fprintf(gnuplotPipe, "set style data points\n" );
     fprintf(gnuplotPipe, "set pointsize 2\n" );
-    fprintf(gnuplotPipe, "plot '../report/poly_raw.dat' title 'Input', ");
-    fprintf(gnuplotPipe, "'../report/poly_fit.dat' title 'Fit'\n");
+    fprintf(gnuplotPipe, "plot 'poly_raw.dat' title 'Input', ");
+    fprintf(gnuplotPipe, "'poly_fit.dat' title 'Fit'\n");
 
     pclose(gnuplotPipe);
 
