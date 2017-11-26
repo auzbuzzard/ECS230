@@ -46,13 +46,23 @@ p9 = read.table("../data/poly_coef_9.dat")
 
 ## @knitr AIC
 dd = d[d$D == 0, c("X", "Y")]
-mf = lm(Y ~ poly(X, 8), data=dd)
-mn = lm(Y ~ 1, data=dd)
-maic = step(mn, scope=list(lower=mn, upper=mf), direction="forward", k=2)
-summary(maic)
+a = data.frame(degree=numeric(), aic=numeric())
+for(i in 1:8){
+    m = lm(Y ~ poly(X, i), data=dd)
+    # print(paste("AIC for poly of degree", d, ":", AIC(m)))
+    a[i,] = c(i, AIC(m))
+}
 
 ## @knitr LASSO
-x = matrix(model.matrix(~ poly(X, 9), dd), 10, 10)
+x = matrix(model.matrix(~ poly(X, 9), dd), 10, 10)[,2:10]
 y = dd$Y
 mlas = glmnet(x, y, alpha=1) # alpha=1 for LASSO
 plot(mlas, xvar="lambda")
+
+# crossval to select best lambda
+cv.mlas = cv.glmnet(x, y, alpha=1) # alpha=1 for LASSO
+plot(cv.mlas)
+
+best.lambda <- cv.mlas$lambda.min
+
+mlas.opt = glmnet(x, y, alpha=best.lambda)
