@@ -48,6 +48,7 @@ int i, j; // loop counters
 float x, y; // for reading x and y from data_fn
 int n; // size of the input data (n by 2 i.e. n xs and n ys)
 char string[1024]; // target string for snprintf()
+int firstline; // determines whether reading first line of data.dat or not
 
 // file handling objects
 FILE *ifp; // pointer to the file object containing the input data
@@ -86,7 +87,7 @@ double r;
 // BEGIN MAIN
 int main(int argc, char** argv)
 {
-    d = atoi(argv[1]); // degree of fit polynomial from commandline
+    d = atoi(argv[1]) + 1; // degree of fit polynomial from commandline
 
     // read data into memory from disk
     ifp = fopen(data_fn, mode);
@@ -95,31 +96,38 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    // print input contents back out to stdIO and count lines
-    n = 0;
-    while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
-        n++; // count the number of lines
-    }
-    fclose(ifp);
-
-    // allocate memory for the input data
-    double *X = (double*) malloc(n*d* sizeof(double));
-    // NOTE: X is col-major indexed i.e. X[i + n*j] = X_(i,j)
+    n = 1;
+    firstline = 1;
+    double *X = (double*) malloc(n*d* sizeof(double)); // placeholder malloc
     double *Y = (double*) malloc(n* sizeof(double));
-    if ((X == NULL) || (Y == NULL)) {
-        fprintf(stderr, "malloc failed\n");
-        return(1);
-    }
 
-    // read input data into the X and Y arrays
-    ifp = fopen(data_fn, mode);
-    i = 0;
     while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
-        for(j = 0; j < d+1; j++){
-            X[i + j*n] = pow(x, j); // each col of X is ((x_i)^j)_{i=1..n}, j<=d
+        if(firstline == 1){
+
+            printf("Observed %f data\n", x);
+            n = x; // n_obs is first line of data.dat
+            firstline = 0;
+
+            // allocate memory for the input data
+            // NOTE: X is col-major indexed i.e. X[i + n*j] = X_(i,j)
+            X = realloc(X, n*d*sizeof(double));
+            Y = realloc(Y, n*sizeof(double));
+            if ((X == NULL) || (Y == NULL)) {
+                fprintf(stderr, "malloc failed\n");
+                return(1);
+            }
+
+        }else{
+
+            // subsequent lines are the observations
+            for(j = 0; j < d+1; j++){
+                // each col of X is ((x_i)^j)_{i=1..n}, j<=d
+                X[i + j*n] = pow(x, j);
+            }
+            Y[i] = y;
+            i++;
+
         }
-        Y[i] = y;
-        i++;
     }
     fclose(ifp);
 
