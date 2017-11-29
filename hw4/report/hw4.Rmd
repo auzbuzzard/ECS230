@@ -31,9 +31,9 @@ read_chunk("../src/hw4.R")
 ```
 
 The coefficients of the 5th degree polynomial regression are
-$$c_5 = `r as.matrix(p5)[1:5,]`$$
+`r kable(p5, align="l")`
 and
-$$c_9 = `r as.matrix(p9)[1:9,]`$$
+`r kable(p9, align="l")`
 
 Note that
 we can't fit a polynomial of degree 11 (a polynomial with constant

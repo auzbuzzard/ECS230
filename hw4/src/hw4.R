@@ -18,13 +18,13 @@ data_dir = "../data/"
 
 d = data.frame(D = numeric(), X = numeric(), Y = numeric())
 # D == 0 is raw observations, otherwise D is degree of polynomial
-for(i in 3:9){
+for(i in 2:9){
     tmp = read.table(paste(data_dir, "poly_fit_", i, ".dat", sep=""))
     names(tmp) = c("X", "Y")
     tmp$D = i
     d = rbind(d, tmp)
 }
-tmp = read.table(paste(data_dir, "data.dat", sep=""))
+tmp = read.table(paste(data_dir, "data.dat", sep=""), skip=1)
 names(tmp) = c("X", "Y")
 tmp$D = 0
 d = rbind(d, tmp)
@@ -42,7 +42,9 @@ plt1
 
 ## @knitr POLY59
 p5 = read.table("../data/poly_coef_5.dat")
+names(p5) = c("degree.5.coefficients")
 p9 = read.table("../data/poly_coef_9.dat")
+names(p9) = c("degree.9.coefficients")
 
 ## @knitr AIC
 dd = d[d$D == 0, c("X", "Y")]
