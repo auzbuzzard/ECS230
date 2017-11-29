@@ -14,9 +14,11 @@
 // 3. https://www.math.utah.edu/software/lapack/lapack-blas/dgemm.html
 // 4  http://www.math.utah.edu/software/lapack/lapack-d/dpotrf.html
 // 5. https://stackoverflow.com/questions/3521209/making-c-code-plot-a-graph-automatically
+// 6. https://linux.die.net/man/3/getline
 
 #include "stdio.h"
 #include "stdlib.h"
+#include "string.h"
 #include "math.h"
 #include "Accelerate/Accelerate.h"
 // #include "cblas.h"
@@ -49,6 +51,7 @@ float x, y; // for reading x and y from data_fn
 int n; // size of the input data (n by 2 i.e. n xs and n ys)
 char string[1024]; // target string for snprintf()
 int firstline; // determines whether reading first line of data.dat or not
+float numstab = 100.0; // scale up input data for numerical stability
 
 // file handling objects
 FILE *ifp; // pointer to the file object containing the input data
@@ -101,12 +104,19 @@ int main(int argc, char** argv)
     double *X = (double*) malloc(n*d* sizeof(double)); // placeholder malloc
     double *Y = (double*) malloc(n* sizeof(double));
 
-    while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file
+    /* while (fscanf(ifp, "%f %f", &x, &y) != EOF) { // for each line in the file */
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    char * pch;
+    while ((read = getline(&line, &len, ifp)) != -1){
         if(firstline == 1){
 
-            printf("Observed %f data\n", x);
-            n = x; // n_obs is first line of data.dat
+            printf("Read first line (len %zu) : ", read);
+            printf("%s\n", line);
+            n = atoi(line); // n_obs is first line of data.dat
             firstline = 0;
+            printf("Using %d observations\n", n);
 
             // allocate memory for the input data
             // NOTE: X is col-major indexed i.e. X[i + n*j] = X_(i,j)
@@ -115,21 +125,40 @@ int main(int argc, char** argv)
             if ((X == NULL) || (Y == NULL)) {
                 fprintf(stderr, "malloc failed\n");
                 return(1);
+            }else{
+                printf("Memory allocated for input and design matrices\n\n");
             }
 
         }else{
 
+            printf("Read line (len %zu) : ", read);
+            printf("%s", line);
+            pch = strtok(line," "); // parse line into x, y floats
+            x = INFINITY;
+            y = INFINITY;
+            while (pch != NULL) {
+                if(x == INFINITY){
+                    x = atof(pch);
+                }else{
+                    y = atof(pch);
+                }
+                /* printf("%f\n", atof(pch)); */
+                pch = strtok(NULL, " ");
+            }
+
             // subsequent lines are the observations
             for(j = 0; j < d+1; j++){
                 // each col of X is ((x_i)^j)_{i=1..n}, j<=d
-                X[i + j*n] = pow(x, j);
+                X[i + j*n] = pow(x, j)*numstab;
             }
-            Y[i] = y;
+            Y[i] = y*numstab;
+
             i++;
 
         }
     }
     fclose(ifp);
+    printf("\n");
 
     // print the X and Y matrices
     printf("Y\t\t"); // BEGIN formatting printing header
@@ -145,7 +174,6 @@ int main(int argc, char** argv)
         }
         printf("\n");
     } // END print X and Y
-
 
     // compute A=X^T X using BLAS::dgemm()
     // initialize
@@ -343,22 +371,26 @@ int main(int argc, char** argv)
     // print the solution Yhat = XB
     printf("\nYhat = XB\n");
     for(i = 0; i < n; i++){
+        Yhat[i] = Yhat[i]/numstab; // renormalize numerical stability parameter
         printf("%f\n", Yhat[i]);
     }
 
     // Write output to disk for subsequent analysis
-    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_raw_", d, ".dat");
+    snprintf(string, sizeof(string), "%s%d%s", "../data/poly_raw_", d-1, ".dat");
     out_raw = fopen(string, "w");
-    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_fit_", d, ".dat");
+    snprintf(string, sizeof(string), "%s%d%s", "../data/poly_fit_", d-1, ".dat");
     out_fit = fopen(string, "w");
-    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_coef_", d, ".dat");
+    snprintf(string, sizeof(string), "%s%d%s", "../data/poly_coef_", d-1, ".dat");
     out_coef = fopen(string, "w");
-    snprintf(string, sizeof(string), "%s%d%s", "../report/poly_designMx_", d, ".dat");
+    snprintf(string, sizeof(string), "%s%d%s", "../data/poly_designMx_", d-1, ".dat");
     out_designMx = fopen(string, "w");
     for (i=0; i < n; i++) {
+        X[i + n] = X[i + n] / numstab;
+        Y[i] = Y[i] / numstab;
         fprintf(out_raw, "%lf %lf\n", X[i + n], Y[i]);
         fprintf(out_fit, "%lf %lf\n", X[i + n], Yhat[i]);
         for(j=0; j<d; j++){
+            X[i + j*n] = X[i + j*n] / numstab;
             fprintf(out_designMx, "%lf ", X[i + j*n]);
         }
         fprintf(out_designMx, "\n");
@@ -388,19 +420,19 @@ int main(int argc, char** argv)
     // Gnuplot the resulting fit and the raw data
     gnuplotPipe = popen("gnuplot", "w");
     fprintf(gnuplotPipe, "set terminal jpeg\n");
-    fprintf(gnuplotPipe, "set output '../report/plot_%d.jpeg'\n", d);
+    fprintf(gnuplotPipe, "set output '../report/plot_%d.jpeg'\n", d-1);
 
     fprintf(gnuplotPipe, "set grid\n" );
     fprintf(gnuplotPipe,
         "set title 'Observed data and polynomial fit (d=%d, R2=%f)'\n",
-        d, r);
+        d-1, r);
     fprintf(gnuplotPipe, "set key left box\n" );
     fprintf(gnuplotPipe, "set xlabel 'X'\n" );
     fprintf(gnuplotPipe, "set ylabel 'Y'\n" );
     fprintf(gnuplotPipe, "set style data points\n" );
     fprintf(gnuplotPipe, "set pointsize 2\n" );
-    fprintf(gnuplotPipe, "plot '%s' title 'Input', ", data_fn);
-    fprintf(gnuplotPipe, "'../report/poly_fit_%d.dat' title 'Fit'\n", d);
+    fprintf(gnuplotPipe, "plot '../data/poly_raw_%d.dat' title 'Input', ", d-1);
+    fprintf(gnuplotPipe, "'../data/poly_fit_%d.dat' title 'Fit'\n", d-1);
 
     pclose(gnuplotPipe);
 
