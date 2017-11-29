@@ -52,7 +52,7 @@ a = data.frame(degree=numeric(), aic=numeric())
 for(i in 1:8){
     m = lm(Y ~ poly(X, i), data=dd)
     # print(paste("AIC for poly of degree", d, ":", AIC(m)))
-    a[i,] = c(i, AIC(m))
+    a[i,] = c(i-1, AIC(m))
 }
 
 ## @knitr LASSO
