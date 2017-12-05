@@ -117,7 +117,11 @@ int main(int argc, char** argv)
                     A[i1 + n*i2] = 0.0;
                     /* printf(A[i + n*j]); */
                 }
-                b1[i1] = 1.0/n;
+                if(i1==0){
+                    b1[i1] = 1.0;///n;
+                }else{
+                    b1[i1] = 0.0;///n;
+                }
             }
 
         }else{
@@ -181,20 +185,22 @@ int main(int argc, char** argv)
     ALPHA = 1.0;
     BETA = 0.0;
 
-    /* for(itt=0; itt<1; itt++){ // TODO replace with convergence criterion */
+    for(itt=0; itt<3; itt++){ // TODO replace with convergence criterion
 
-        // TODO fix this dgemv_() formulation
-        dgemv_(&TRANS, &M, &N,
-            &ALPHA, A, &LDA, b1, &INCB, &BETA,
-            b2, &INCB);
+        dgemv_(&TRANS, &M, &N, &ALPHA,
+                A, &LDA,
+                b1, &INCB, &BETA,
+                b2, &INCB);
 
+        // copy b1 <- b2 and print
         printf("\nb%d:\n", itt);
         for(i=0;i<n;i++){
-            printf("%f\n", b2[i]);
+            b1[i] = b2[i];
+            printf("%f\n", b1[i]);
         }
         printf("\n");
 
-    /* } */
+    }
 
     return 0;
 }
