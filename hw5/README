@@ -1,0 +1,6 @@
+AUTHOR: Eric Kalosa-Kenyon
+
+This project is an investigation of the methods used in PageRank.
+
+To compile the program, execute the following command:
+    gcc -o ../bin/pow_metd power_method.c -lm -lblas -llapack;
