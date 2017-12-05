@@ -89,11 +89,12 @@ int main(int argc, char** argv)
     while ((read = getline(&line, &len, ifp)) != -1){
         if(firstline == 1){
 
-            printf("Read first line (len %zu) : ", read);
-            printf("%s\n", line);
+            /* printf("Read first line (len %zu) : ", read); */
+            /* printf("%s\n", line); */
             n = atoi(line); // n_obs is first line of data.dat
             firstline = 0;
-            printf("Using %d observations\n", n);
+            /* printf("Using %d observations\n", n); */
+            printf("n=%d\n", n);
 
             // allocate memory for the input data
             // NOTE: A is col-major indexed i.e. A[i + n*j] = A_(i,j)
@@ -104,7 +105,7 @@ int main(int argc, char** argv)
                 fprintf(stderr, "malloc failed\n");
                 return(1);
             }else{
-                printf("Memory allocated for input and design matrices\n\n");
+                /* printf("Memory allocated for input and design matrices\n\n"); */
             }
 
             // initialize A as 0s, b as arbitrary
@@ -114,7 +115,7 @@ int main(int argc, char** argv)
                     A[i1 + n*i2] = 0.0;
                     /* printf(A[i + n*j]); */
                 }
-                b[i1] = 1.0/(float) (i1+1);
+                b[i1] = 1.0/n;
             }
 
         }else{
@@ -124,26 +125,25 @@ int main(int argc, char** argv)
             /* printf("%s", line); */
             pch = strtok(line," "); // parse line into matrix A's j'th col
             k = 0;
-            // i is column, k is row
             firstline = 1;
             float nj;
             while (pch != NULL) {
                 if(firstline == 1){
                     nj = atof(pch); // number of outlinks for node j
                     firstline = 0;
-                    printf("Col %i connected to %d rows\n", i, (int) nj);
+                    /* printf("Col %i connected to %d rows\n", i, (int) nj); */
                 }else{
                     k = atof(pch); // node pointed to by j is k
-                    printf("k,i:%d,%d:\n", k,i);
-                    A[i + n*(k-1)] = 1.0/nj;
-                    printf("A_%d,%d: %f\n", i, k-1, A[i + n*(k-1)]);
+                    /* printf("k,i:%d,%d:\n", k,i); */
+                    A[k-1 + n*i] = 1.0/nj;
+                    /* printf("A_%d,%d: %f\n", i, k-1, A[i + n*(k-1)]); */
                 }
 
                 pch = strtok(NULL, " ");
             }
 
             i++;
-            printf("\n");
+            /* printf("\n"); */
         }
     }
     fclose(ifp);
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
         printf("\n");
     }
     i = 0;
-    printf("b:\n");
+    printf("\nb:\n");
     for(i=0;i<n;i++){
         printf("%f\n", b[i]);
     }
@@ -174,22 +174,21 @@ int main(int argc, char** argv)
     TRANS = 'N'; // transpose the matrix A
     M = n; // rows of A (number of obs)
     N = n; // columns of A (degree of polynom)
-    ALPHA = 1.0;
-    BETA = 1.0;
     LDA = n; // leading dimension of A
-    INCA = 1; // increment for the input vector
-    INCB = 1; // increment for the input vector
+    INCB = 1;
+    ALPHA = 1.0;
+    BETA = 0.0;
 
     for(itt=0; itt<1; itt++){ // TODO replace with convergence criterion
 
-        // TODO fix this
+        // TODO fix this dgemv_() formulation
         dgemv_(&TRANS, &M, &N,
             &ALPHA, A, &LDA, b, &INCB, &BETA,
             b, &INCB);
 
         printf("\nb%d:\n", itt);
         for(i=0;i<n;i++){
-            printf("%f\t", b[i]);
+            printf("%f\n", b[i]);
         }
         printf("\n");
 
