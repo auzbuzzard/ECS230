@@ -84,6 +84,7 @@ int main(int argc, char** argv)
     n = 1;
     firstline = 1;
     double *A = (double*) malloc(n*n* sizeof(double)); // placeholder malloc
+    double *b = (double*) malloc(n* sizeof(double)); // placeholder malloc
 
     // read file
     char * line = NULL;
@@ -103,6 +104,8 @@ int main(int argc, char** argv)
             // allocate memory for the input data
             // NOTE: A is col-major indexed i.e. A[i + n*j] = A_(i,j)
             A = realloc(A, n*n*sizeof(double));
+            b = realloc(b, n*sizeof(double));
+
             if (A == NULL) {
                 fprintf(stderr, "malloc failed\n");
                 return(1);
@@ -110,8 +113,19 @@ int main(int argc, char** argv)
                 printf("Memory allocated for input and design matrices\n\n");
             }
 
+            // initialize A as 0s, b as arbitrary
+            int i1, i2;
+            for(i1=0;i1<n;i1++){
+                for(i2=0;i2<n;i2++){
+                    A[i1 + n*i2] = 0.0;
+                    /* printf(A[i + n*j]); */
+                }
+                b[i1] = 1.0/(float) (i1+1);
+            }
+
         }else{
 
+            // Calculate and install input into matrix A
             /* printf("Read line (len %zu) : ", read); */
             /* printf("%s", line); */
             pch = strtok(line," "); // parse line into matrix A's j'th col
@@ -140,6 +154,28 @@ int main(int argc, char** argv)
     }
     fclose(ifp);
     printf("\n");
+
+    // print A and b
+    i = 0;
+    j = 0;
+    printf("A:\n");
+    for(i=0;i<n;i++){
+        for(j=0;j<n;j++){
+            printf("%f ", A[i + n*j]);
+        }
+        printf("\n");
+    }
+    i = 0;
+    printf("b:\n");
+    for(i=0;i<n;i++){
+        printf("%f\t", b[i]);
+    }
+
+    // Power method
+    // $b_{k+1} = A b_k \over \norm{A b_k}$ until convergence, determined as
+    // follows: $\infty_norm{ b_{k+1} - b_k } < \epsilon = 1.0e-6$
+    //
+    // Using dgemv_(A, b);
 
     return 0;
 }
