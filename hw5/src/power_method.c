@@ -41,7 +41,7 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 // for general configuration
 /* const char data_fn[] = "../data/data.dat"; // location of the input data */
 const char data_fn[] = "../data/test_A.dat"; // location of the input data
-int i, j, k; // loop counters
+int i, j, k, itt; // loop counters
 int n; // size of graph's vertex set
 int firstline; // determines whether reading first line of data.dat or not
 
@@ -52,22 +52,16 @@ FILE * out_raw; // where to write raw output
 FILE * gnuplotPipe;
 
 // CBLAS/LAPACK inputs
-char TRANSA;
-char TRANSB;
 char TRANS;
 double ALPHA;
 double BETA;
 int M;
 int N;
-int K;
 int LDA;
 int LDB;
 int LDC;
+int INCA;
 int INCB;
-int INCY;
-int INCP;
-char SIDE;
-char DIAG;
 
 // END VARIABLES
 
@@ -168,14 +162,38 @@ int main(int argc, char** argv)
     i = 0;
     printf("b:\n");
     for(i=0;i<n;i++){
-        printf("%f\t", b[i]);
+        printf("%f\n", b[i]);
     }
 
     // Power method
     // $b_{k+1} = A b_k \over \norm{A b_k}$ until convergence, determined as
     // follows: $\infty_norm{ b_{k+1} - b_k } < \epsilon = 1.0e-6$
     //
-    // Using dgemv_(A, b);
+    // Using dgemv_(A, b)
+
+    TRANS = 'N'; // transpose the matrix A
+    M = n; // rows of A (number of obs)
+    N = n; // columns of A (degree of polynom)
+    ALPHA = 1.0;
+    BETA = 1.0;
+    LDA = n; // leading dimension of A
+    INCA = 1; // increment for the input vector
+    INCB = 1; // increment for the input vector
+
+    for(itt=0; itt<1; itt++){ // TODO replace with convergence criterion
+
+        // TODO fix this
+        dgemv_(&TRANS, &M, &N,
+            &ALPHA, A, &LDA, b, &INCB, &BETA,
+            b, &INCB);
+
+        printf("\nb%d:\n", itt);
+        for(i=0;i<n;i++){
+            printf("%f\t", b[i]);
+        }
+        printf("\n");
+
+    }
 
     return 0;
 }
