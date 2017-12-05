@@ -41,7 +41,7 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 // for general configuration
 /* const char data_fn[] = "../data/data.dat"; // location of the input data */
 const char data_fn[] = "../data/test_A.dat"; // location of the input data
-int i, j; // loop counters
+int i, j, k; // loop counters
 int n; // size of graph's vertex set
 int firstline; // determines whether reading first line of data.dat or not
 
@@ -115,13 +115,23 @@ int main(int argc, char** argv)
             /* printf("Read line (len %zu) : ", read); */
             /* printf("%s", line); */
             pch = strtok(line," "); // parse line into matrix A's j'th col
-            double e = 0.0;
-            j = 0;
+            k = 0;
+            // i is column, k is row
+            firstline = 1;
+            float nj;
             while (pch != NULL) {
-                e = atof(pch);
-                printf("%d,%d: %f\t", i, j, e);
+                if(firstline == 1){
+                    nj = atof(pch); // number of outlinks for node j
+                    firstline = 0;
+                    printf("Col %i connected to %d rows\n", i, (int) nj);
+                }else{
+                    k = atof(pch); // node pointed to by j is k
+                    printf("k,i:%d,%d:\n", k,i);
+                    A[i + n*(k-1)] = 1.0/nj;
+                    printf("A_%d,%d: %f\n", i, k-1, A[i + n*(k-1)]);
+                }
+
                 pch = strtok(NULL, " ");
-                j++;
             }
 
             i++;
