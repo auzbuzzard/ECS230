@@ -78,7 +78,8 @@ int main(int argc, char** argv)
     n = 1;
     firstline = 1;
     double *A = (double*) malloc(n*n* sizeof(double)); // placeholder malloc
-    double *b = (double*) malloc(n* sizeof(double)); // placeholder malloc
+    double *b1 = (double*) malloc(n* sizeof(double)); // placeholder malloc
+    double *b2 = (double*) malloc(n* sizeof(double)); // placeholder malloc
 
     // read file
     char * line = NULL;
@@ -99,7 +100,8 @@ int main(int argc, char** argv)
             // allocate memory for the input data
             // NOTE: A is col-major indexed i.e. A[i + n*j] = A_(i,j)
             A = realloc(A, n*n*sizeof(double));
-            b = realloc(b, n*sizeof(double));
+            b1 = realloc(b1, n*sizeof(double));
+            b2 = realloc(b2, n*sizeof(double));
 
             if (A == NULL) {
                 fprintf(stderr, "malloc failed\n");
@@ -115,7 +117,7 @@ int main(int argc, char** argv)
                     A[i1 + n*i2] = 0.0;
                     /* printf(A[i + n*j]); */
                 }
-                b[i1] = 1.0/n;
+                b1[i1] = 1.0/n;
             }
 
         }else{
@@ -126,7 +128,7 @@ int main(int argc, char** argv)
             pch = strtok(line," "); // parse line into matrix A's j'th col
             k = 0;
             firstline = 1;
-            float nj;
+            double nj;
             while (pch != NULL) {
                 if(firstline == 1){
                     nj = atof(pch); // number of outlinks for node j
@@ -162,7 +164,7 @@ int main(int argc, char** argv)
     i = 0;
     printf("\nb:\n");
     for(i=0;i<n;i++){
-        printf("%f\n", b[i]);
+        printf("%f\n", b1[i]);
     }
 
     // Power method
@@ -179,20 +181,20 @@ int main(int argc, char** argv)
     ALPHA = 1.0;
     BETA = 0.0;
 
-    for(itt=0; itt<1; itt++){ // TODO replace with convergence criterion
+    /* for(itt=0; itt<1; itt++){ // TODO replace with convergence criterion */
 
         // TODO fix this dgemv_() formulation
         dgemv_(&TRANS, &M, &N,
-            &ALPHA, A, &LDA, b, &INCB, &BETA,
-            b, &INCB);
+            &ALPHA, A, &LDA, b1, &INCB, &BETA,
+            b2, &INCB);
 
         printf("\nb%d:\n", itt);
         for(i=0;i<n;i++){
-            printf("%f\n", b[i]);
+            printf("%f\n", b2[i]);
         }
         printf("\n");
 
-    }
+    /* } */
 
     return 0;
 }
