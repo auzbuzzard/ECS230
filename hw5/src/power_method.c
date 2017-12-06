@@ -42,7 +42,8 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 // BEGIN VARIABLES
 // for general configuration
 /* const char data_fn[] = "../data/data.dat"; // location of the input data */
-const char data_fn[] = "../data/test_A.dat"; // location of the input data
+/* const char data_fn[] = "../data/test_A.dat"; // location of the input data */
+const char data_fn[] = "../data/bryan_leise_2006_fig1.dat";
 int i, j, k, itt; // loop counters
 int n; // size of graph's vertex set
 int firstline; // determines whether reading first line of data.dat or not
@@ -119,11 +120,7 @@ int main(int argc, char** argv)
                     A[i1 + n*i2] = 0.0;
                     /* printf(A[i + n*j]); */
                 }
-                if(i1==0){
-                    b1[i1] = 1.0;///n;
-                }else{
-                    b1[i1] = 0.5;///n;
-                }
+                b1[i1] = 1.0;///n;
             }
 
         }else{
@@ -157,7 +154,7 @@ int main(int argc, char** argv)
     fclose(ifp);
     printf("\n");
 
-    // print A and b
+    // print A
     i = 0;
     j = 0;
     printf("A:\n");
@@ -167,13 +164,8 @@ int main(int argc, char** argv)
         }
         printf("\n");
     }
-    i = 0;
-    printf("\nb0:\n");
-    for(i=0;i<n;i++){
-        printf("%f\n", b1[i]);
-    }
-    printf("\n");
 
+    // normalize b_0
     double norm_b;
     int INCX = 1;
     norm_b = cblas_dnrm2(n, b1, INCX);
@@ -182,6 +174,14 @@ int main(int argc, char** argv)
         b1[i] = b1[i] / norm_b;
     }
     norm_b = cblas_dnrm2(n, b1, INCX);
+
+    // print normalized b_0
+    i = 0;
+    printf("\nb0:\n");
+    for(i=0;i<n;i++){
+        printf("%f\n", b1[i]);
+    }
+    printf("\n");
     /* printf("\nnorm b:\n%f\n", norm_b); */
 
     // Power method
@@ -239,6 +239,12 @@ int main(int argc, char** argv)
         }
 
         itt++;
+    }
+
+    // scale eigenvector so L1 norm is 1
+    norm_b = cblas_dasum(n, b1, 1);
+    for(i=0; i<n; i++){
+        b1[i] = b1[i] / norm_b;
     }
 
     printf("\nConvergence after %d iterations to dominant eigenvector b:\n",
