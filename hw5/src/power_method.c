@@ -41,9 +41,9 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 
 // BEGIN VARIABLES
 // for general configuration
-/* const char data_fn[] = "../data/data.dat"; // location of the input data */
 /* const char data_fn[] = "../data/test_A.dat"; // location of the input data */
-const char data_fn[] = "../data/bryan_leise_2006_fig1.dat";
+/* const char data_fn[] = "../data/bryan_leise_2006_fig1.dat"; */
+const char data_fn[] = "../data/ex1_add_pg_5.dat";
 int i, j, k, itt; // loop counters
 int n; // size of graph's vertex set
 int firstline; // determines whether reading first line of data.dat or not
