@@ -121,7 +121,8 @@ int main(int argc, char** argv)
                     A[i1 + n*i2] = 0.0;
                     /* printf(A[i + n*j]); */
                 }
-                b1[i1] = (double) i1 + 1;//1.0;///n;
+                /* b1[i1] = (double) i1 + 1;//1.0;///n; */
+                b1[i1] = 1.0;
             }
 
         }else{
@@ -242,7 +243,7 @@ int main(int argc, char** argv)
         // copy b1 <- b2
         for(i=0;i<n;i++){
             b1[i] = b2[i];
-            printf("%f\n", b1[i]);
+            /* printf("%f\n", b1[i]); */
         }
 
         itt++;
