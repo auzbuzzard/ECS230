@@ -35,6 +35,8 @@ int dpotrf_(char * uplo, int * n,
 void dtrsm_(char * side, char * uplo, char * transa, char * diag,
     int * m, int * n, double * alpha, double * A,
     int * lda, double * B, int * ldb);
+
+/* double dnrm2_() */
 // END PROTOTYPES
 
 // BEGIN VARIABLES
@@ -120,7 +122,7 @@ int main(int argc, char** argv)
                 if(i1==0){
                     b1[i1] = 1.0;///n;
                 }else{
-                    b1[i1] = 0.0;///n;
+                    b1[i1] = 0.5;///n;
                 }
             }
 
@@ -166,10 +168,21 @@ int main(int argc, char** argv)
         printf("\n");
     }
     i = 0;
-    printf("\nb:\n");
+    printf("\nb0:\n");
     for(i=0;i<n;i++){
         printf("%f\n", b1[i]);
     }
+    printf("\n");
+
+    double norm_b;
+    int INCX = 1;
+    norm_b = cblas_dnrm2(n, b1, INCX);
+    /* printf("\nnorm b:\n%f\tnormalizing...\n", norm_b); */
+    for(i=0; i<n; i++){
+        b1[i] = b1[i] / norm_b;
+    }
+    norm_b = cblas_dnrm2(n, b1, INCX);
+    /* printf("\nnorm b:\n%f\n", norm_b); */
 
     // Power method
     // $b_{k+1} = A b_k \over \norm{A b_k}$ until convergence, determined as
@@ -185,21 +198,53 @@ int main(int argc, char** argv)
     ALPHA = 1.0;
     BETA = 0.0;
 
-    for(itt=0; itt<3; itt++){ // TODO replace with convergence criterion
+    double epsilon = 1.0e-6;
+    /* double epsilon = 1.0e-2; */
+    double delta = 1.0;
+    itt = 0;
+    while(delta > epsilon){
 
+        // normalize b1
+        norm_b = cblas_dnrm2(n, b1, INCX);
+        for(i=0; i<n; i++){
+            b1[i] = b1[i] / norm_b;
+        }
+        /* printf("\nnorm b%d:%f\n", itt, norm_b); */
+
+        // multiply b2 <- A b1
         dgemv_(&TRANS, &M, &N, &ALPHA,
                 A, &LDA,
                 b1, &INCB, &BETA,
                 b2, &INCB);
 
-        // copy b1 <- b2 and print
-        printf("\nb%d:\n", itt);
+        // normalize b2
+        norm_b = cblas_dnrm2(n, b2, INCX);
+        /* printf("\nb%d:\n", itt); */
+        for(i=0;i<n;i++){
+            b2[i] = b2[i] / norm_b;
+            /* printf("%f\n", b2[i]); */
+        }
+
+        // calculate delta
+        delta = 0.0;
+        for(i=0; i<n; i++){
+            delta = delta + fabs(b1[i] - b2[i]);
+        }
+        printf("delta %d: %f\n", itt, delta);
+
+        // copy b1 <- b2
         for(i=0;i<n;i++){
             b1[i] = b2[i];
-            printf("%f\n", b1[i]);
+            /* printf("%f\n", b1[i]); */
         }
-        printf("\n");
 
+        itt++;
+    }
+
+    printf("\nConvergence after %d iterations to dominant eigenvector b:\n",
+            itt);
+    for(i=0; i<n; i++){
+        printf("%f\n", b1[i]);
     }
 
     return 0;
