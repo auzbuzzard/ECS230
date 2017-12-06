@@ -12,7 +12,23 @@ output:
     smart: false
 ---
 
-# 
+# Brief proof of a property of eigenvalues
+Let $A$ be a real $n\times n$ matrix and $\lambda$ an eigenvalue of $A$. Here,
+I show that $\lambda$ is an eigenvalue of $A^\top$ as well.
+
+Notice that the eigenvalues of $A$ are the roots of its characteristic
+polynomial $f(\lambda) = det(A-\lambda I)$. Similarly, let
+$f^\top(\lambda) = det(A^\top-\lambda I)$ be the characteristic polynomial of
+the transposed matrix $A^\top$. This proof boils down to showing that
+$f(\lambda) = f^\top(\lambda)$ as follows:
+
+1. $f(\lambda) = det(A-\lambda I)$
+2. $det(A-\lambda I) = det((A-\lambda I)^\top)$
+3. $det((A-\lambda I)^\top) = det(A^\top-\lambda I^\top)$
+4. $det(A^\top-\lambda I^\top) = det(A^\top - \lambda I)$
+5. $det(A^\top - \lambda I) = f^\top(\lambda) \quad \blacksquare$
+
+
 
 ```{r, echo=F}
 library("knitr")
@@ -30,8 +46,20 @@ The following sections contain useful supplementary information.
 
 ## Data
 
-```{r, echo=F}
-kable(d, align="l")
+```{r engine='bash', comment='bryan_leise_2006_fig1.dat:', echo=F}
+cat ../data/bryan_leise_2006_fig1.dat
+```
+
+```{r engine='bash', comment='ex1_add_pg_5.dat:', echo=F}
+cat ../data/ex1_add_pg_5.dat
+```
+
+```{r engine='bash', comment='lin_chain_len_4.dat:', echo=F}
+cat ../data/lin_chain_len_4.dat
+```
+
+```{r engine='bash', comment='test_A.dat:', echo=F}
+cat ../data/test_A.dat
 ```
 
 ## Source code
@@ -41,7 +69,7 @@ The hand-in code conforms to the specifications of the assignment, wheras the
 following source is formatted to work with the project's directory structure. No
 major algorithmic changes were made.
 
-```{r engine='bash', comment='', echo=F}
+```{r engine='bash', comment='Main source:', echo=F}
 cat ../src/power_method.c
 ```
 
