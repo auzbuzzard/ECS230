@@ -7,7 +7,6 @@
 //      data.dat - input data (format not explicitly specified here)
 // Returns:
 //      StdIO - results
-//      File - results
 //
 // Sources:
 
