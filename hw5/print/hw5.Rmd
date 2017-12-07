@@ -28,23 +28,148 @@ $f(\lambda) = f^\top(\lambda)$ as follows:
 4. $det(A^\top-\lambda I^\top) = det(A^\top - \lambda I)$
 5. $det(A^\top - \lambda I) = f^\top(\lambda) \quad \blacksquare$
 
+Warrant for each of the steps in the proof above follow:
 
+The first and final steps of the proof are the respective definitions of
+$f(\lambda)$ and $f^\top(\lambda)$. The second step can be seen by expanding
+$A-\lambda I$ into its $QR$ decomposition and using determinant product rules.
+The third and fourth steps are obvious.
 
-```{r, echo=F}
+# Power method
+To solve for the dominant eigenvalue of a matrix $A$, the power method can be
+used. In short, the method is as follows:
+$$b_{k+1} = \frac{Ab_k}{||Ab_k||}$$
+This method and several extensions are implemented in the source code included
+at the end of this report.
+
+## Reproducing a simple result
+```{r echo=F, message=F}
 library("knitr")
-read_chunk("../src/hw5.R")
+read_chunk("../src/plot_graphs.R")
 ```
 
-```{r READ, echo=F, message=F}
+```{r graph1, echo=F, message=F}
 ```
 
-```{r GRAPH, echo=F}
-```
+Using the graph presented in figure 1 of Bryan and Leise (2006), the program
+produes the following vector as the dominant L1-normalized eigenvector:
+$$v_1 =
+\left(
+\begin{matrix}
+0.387097 \\
+0.129032 \\
+0.290323 \\
+0.193548
+\end{matrix}
+\right)
+$$
+This solution is produced using the "bryan_leise_2006_fig1.dat" input file and
+corresponds to the ranking $1, 3, 4, 2$.
+
+## A PageRank manipulation strategy
+Using the strategy described in exercise 1 of Bryan and Leise where the owners
+of page $3$ make a new page $5$ and link both together, the dominant eigenvector
+becomes
+$$v_2 =
+\left(
+\begin{matrix}
+0.244898 \\
+0.081633 \\
+0.367347 \\
+0.122449 \\
+0.183673
+\end{matrix}
+\right)
+$$
+This new dominant eigenvector $v_2$ corresponds to the ranking
+$3, 1, 5, 4, 2$. Notice that, using this strategy, the owners of page $3$ were
+able to manipulate the ranks.
+
+## A chain graph
+Using a chain graph of length $n=4$ and an initial vector
+$$b_0 =
+\left(
+\begin{matrix}
+1.000000 \\
+1.000000 \\
+1.000000 \\
+1.000000
+\end{matrix}
+\right)
+$$
+my program converges to the dominant eigenvector
+$$v_3 =
+\left(
+\begin{matrix}
+0.166667 \\
+0.333333 \\
+0.333333 \\
+0.166667
+\end{matrix}
+\right)
+$$
+corresponding to the ranking $\{2, 3\}, \{1, 4\}$ as expected. However, due to
+the fact that the spectrum of the induced matrix column-stochastic link matrix
+$A$ is
+$$
+spec(A) = spec(
+\left(
+\begin{matrix}
+0.166667 \\
+0.333333 \\
+0.333333 \\
+0.166667
+\end{matrix}
+\right)
+) = \{1, \frac{1}{2}, \frac{-1}{2}, -1\}
+$$
+yielding two dominant eigenvectors corresponding to the eigenvalues $1$ and
+$-1$, the power method fails to converge for impropperly selected initial
+vectors. For example, when using
+$$b_0 =
+\left(
+\begin{matrix}
+1.00000 \\
+2.00000 \\
+3.00000 \\
+4.00000
+\end{matrix}
+\right)
+$$
+the result oscilates between
+$$
+\left(
+\begin{matrix}
+0.20000 \\
+0.26666 \\
+0.40000 \\
+0.13333
+\end{matrix}
+\right)
+\textrm{ and }
+\left(
+\begin{matrix}
+0.13333 \\
+0.40000 \\
+0.26666 \\
+0.20000
+\end{matrix}
+\right)
+$$
 
 # Appendix
-The following sections contain useful supplementary information.
 
 ## Data
+
+Following are the files used as inputs for the power_method program. Each
+represents a link matrix and follows the specification for .dat files given in
+the assignment handout:
+1. The first line is a single integer $n$ stating the number of nodes in the
+   graph.
+2. Each subsequent line $j$ starts with an integer $n_j$ stating the number of
+   outgoing links from page $j$.
+3. On line $j$, after the initial $n_j$, each subsequent integer $i$ points to
+   an external page $i$ to which page $j$ links.
 
 ```{r engine='bash', comment='bryan_leise_2006_fig1.dat:', echo=F}
 cat ../data/bryan_leise_2006_fig1.dat
@@ -69,10 +194,6 @@ The hand-in code conforms to the specifications of the assignment, wheras the
 following source is formatted to work with the project's directory structure. No
 major algorithmic changes were made.
 
-```{r engine='bash', comment='Main source:', echo=F}
-cat ../src/power_method.c
-```
-
 ```{r engine='bash', comment='', echo=F}
-cat ../src/hw5.R
+cat ../src/power_method.c
 ```
