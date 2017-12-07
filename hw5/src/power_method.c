@@ -42,8 +42,8 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 // for general configuration
 /* const char data_fn[] = "../data/test_A.dat"; // location of the input data */
 /* const char data_fn[] = "../data/bryan_leise_2006_fig1.dat"; */
-/* const char data_fn[] = "../data/ex1_add_pg_5.dat"; */
-const char data_fn[] = "../data/lin_chain_len_4.dat";
+const char data_fn[] = "../data/ex1_add_pg_5.dat";
+/* const char data_fn[] = "../data/lin_chain_len_4.dat"; */
 int i, j, k, itt; // loop counters
 int n; // size of graph's vertex set
 int firstline; // determines whether reading first line of data.dat or not
@@ -120,8 +120,9 @@ int main(int argc, char** argv)
                     A[i1 + n*i2] = 0.0;
                     /* printf(A[i + n*j]); */
                 }
-                /* b1[i1] = (double) i1 + 1;//1.0;///n; */
-                b1[i1] = 1.0;
+                b1[i1] = (double) i1 + 1;//1.0;///n;
+                /* b1[i1] = 1.0; */
+                b2[i1] = b1[i1];
             }
 
         }else{
@@ -191,10 +192,10 @@ int main(int argc, char** argv)
     //
     // Using dgemv_(A, b)
 
-    double shift = 0.25; // for shifted power method
-    for(i=0; i<n; i++){
-        A[i + n*i] = A[i + n*i] + shift; // add shift*I to A
-    }
+    /* double shift = 0.25; // for shifted power method */
+    /* for(i=0; i<n; i++){ */
+    /*     A[i + n*i] = A[i + n*i] + shift; // add shift*I to A */
+    /* } */
 
     TRANS = 'N'; // transpose the matrix A
     M = n; // rows of A (number of obs)
@@ -207,9 +208,15 @@ int main(int argc, char** argv)
     double epsilon = 1.0e-6;
     /* double epsilon = 1.0e-2; */
     double delta = 1.0;
-    int breaker = 1e4+1;
+    int breaker = 1e2;
     itt = 0;
     while(delta > epsilon){
+
+        // copy b1 <- b2
+        for(i=0;i<n;i++){
+            b1[i] = b2[i];
+            /* printf("%f\n", b1[i]); */
+        }
 
         // normalize b1
         norm_b = cblas_dnrm2(n, b1, INCX);
@@ -239,12 +246,6 @@ int main(int argc, char** argv)
         }
         printf("delta %d: %f\n", itt, delta);
 
-        // copy b1 <- b2
-        for(i=0;i<n;i++){
-            b1[i] = b2[i];
-            /* printf("%f\n", b1[i]); */
-        }
-
         itt++;
 
         if(itt > breaker){
@@ -260,16 +261,23 @@ int main(int argc, char** argv)
         b1[i] = b1[i] / norm_b;
     }
 
-    printf("\nAfter %d iterations to dominant eigenvector b:\n",
-            itt);
-    for(i=0; i<n; i++){
-        printf("%f\n", b1[i]);
-    }
 
     if(itt > breaker){
         printf("\nFailed to converge\n");
+        printf("After %d iterations to vectors:\n", itt);
+        for(i=0; i<n; i++){
+            printf("%f\n", b1[i]);
+        }
+        printf("and\n");
+        for(i=0; i<n; i++){
+            printf("%f\n", b2[i]);
+        }
     }else{
         printf("\nConverged successfully\n");
+        printf("After %d iterations to dominant eigenvector b:\n", itt);
+        for(i=0; i<n; i++){
+            printf("%f\n", b1[i]);
+        }
     }
 
     return 0;
