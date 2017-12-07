@@ -42,8 +42,8 @@ void dtrsm_(char * side, char * uplo, char * transa, char * diag,
 // for general configuration
 /* const char data_fn[] = "../data/test_A.dat"; // location of the input data */
 /* const char data_fn[] = "../data/bryan_leise_2006_fig1.dat"; */
-const char data_fn[] = "../data/ex1_add_pg_5.dat";
-/* const char data_fn[] = "../data/lin_chain_len_4.dat"; */
+/* const char data_fn[] = "../data/ex1_add_pg_5.dat"; */
+const char data_fn[] = "../data/lin_chain_len_4.dat";
 int i, j, k, itt; // loop counters
 int n; // size of graph's vertex set
 int firstline; // determines whether reading first line of data.dat or not
@@ -192,10 +192,10 @@ int main(int argc, char** argv)
     //
     // Using dgemv_(A, b)
 
-    /* double shift = 0.25; // for shifted power method */
-    /* for(i=0; i<n; i++){ */
-    /*     A[i + n*i] = A[i + n*i] + shift; // add shift*I to A */
-    /* } */
+    double shift = 0.25; // for shifted power method
+    for(i=0; i<n; i++){
+        A[i + n*i] = A[i + n*i] + shift; // add shift*I to A
+    }
 
     TRANS = 'N'; // transpose the matrix A
     M = n; // rows of A (number of obs)
