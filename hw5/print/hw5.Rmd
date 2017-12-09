@@ -183,6 +183,24 @@ away from dominance.
 Upon implementation, the shifted power method converges for all tested initial
 vectors.
 
+## Shifted power method vs. regularized power method
+The shifted power method has already been discussed, so I'll move forward
+assuming the reader understands it. The regularized power method is only
+slightly different, and I seek to illuminate the difference as follows:
+wheras; with the shifted method, the matrix $cI$ was added to $A$ in the form
+$B = A+cI$; in the regularized method, the matrix $\frac{1}{n}1_{n\times n}$ is
+added to $A$ in $B^\star=A+\frac{1}{n}1_{n\times n}$.
+
+The merit of the shifted method is that the eigenvectors are invariant under
+this type of shift. The merit of the regularized method is that it may ensure
+the matrix $B^\star$ is well conditioned when data are limited and it guarantees
+a fully connected web.
+
+The ranking of a linear chain would be invariant using either of the two methods
+discussed above. However, the regularized power method may suffer from underflow
+as $n\rightarrow\infty$. The shifted power method does not suffer from such an
+issue.
+
 # Appendix
 
 ## Data
