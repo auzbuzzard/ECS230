@@ -48,6 +48,9 @@ library("knitr")
 read_chunk("../src/plot_graphs.R")
 ```
 
+```{r read_library, echo=F, message=F}
+```
+
 ```{r graph1, echo=F, message=F}
 ```
 
@@ -64,11 +67,15 @@ $$v_1 =
 \right)
 $$
 This solution is produced using the "bryan_leise_2006_fig1.dat" input file and
-corresponds to the ranking $1, 3, 4, 2$.
+corresponds to the ranking $A, C, D, B$.
 
 ## A PageRank manipulation strategy
+
+```{r graph2, echo=F, message=F}
+```
+
 Using the strategy described in exercise 1 of Bryan and Leise where the owners
-of page $3$ make a new page $5$ and link both together, the dominant eigenvector
+of page $C$ make a new page $E$ and link both together, the dominant eigenvector
 becomes
 $$v_2 =
 \left(
@@ -82,10 +89,14 @@ $$v_2 =
 \right)
 $$
 This new dominant eigenvector $v_2$ corresponds to the ranking
-$3, 1, 5, 4, 2$. Notice that, using this strategy, the owners of page $3$ were
+$C, A, E, D, B$. Notice that, using this strategy, the owners of page $3$ were
 able to manipulate the ranks.
 
-## A chain graph
+## A chain graph and the shifted power method
+
+```{r graph3, echo=F, message=F}
+```
+
 Using a chain graph of length $n=4$ and an initial vector
 $$b_0 =
 \left(
@@ -97,6 +108,7 @@ $$b_0 =
 \end{matrix}
 \right)
 $$
+
 my program converges to the dominant eigenvector
 $$v_3 =
 \left(
@@ -108,6 +120,7 @@ $$v_3 =
 \end{matrix}
 \right)
 $$
+
 corresponding to the ranking $\{2, 3\}, \{1, 4\}$ as expected. However, due to
 the fact that the spectrum of the induced matrix column-stochastic link matrix
 $A$ is
@@ -115,14 +128,15 @@ $$
 spec(A) = spec(
 \left(
 \begin{matrix}
-0.166667 \\
-0.333333 \\
-0.333333 \\
-0.166667
+0 & 1/2 & 0 & 0 \\
+1 & 0 & 1/2 & 0 \\
+0 & 1/2 & 0 & 1 \\
+0 & 0 & 1/2 & 0
 \end{matrix}
 \right)
 ) = \{1, \frac{1}{2}, \frac{-1}{2}, -1\}
 $$
+
 yielding two dominant eigenvectors corresponding to the eigenvalues $1$ and
 $-1$, the power method fails to converge for impropperly selected initial
 vectors. For example, when using
@@ -136,6 +150,7 @@ $$b_0 =
 \end{matrix}
 \right)
 $$
+
 the result oscilates between
 $$
 \left(
@@ -149,19 +164,31 @@ $$
 \textrm{ and }
 \left(
 \begin{matrix}
-0.13333 \\
-0.40000 \\
-0.26666 \\
-0.20000
+0.372104 \\
+0.496139 \\
+0.744208 \\
+0.248069
 \end{matrix}
 \right)
 $$
+
+To solve this problem of non-convergence, I implement the shift method. In
+short, this replaces the matrix $A$ with $B=A+cI$ for some constant $c$. Note
+that the eigenvectors are identical for $A$ and $B$: if $v$ is an eigenvector of
+$A$, then $Bv=(A+cI)v=Av+cv=(\lambda+c)v$. Here, noting that the spectrum is
+bounded by $-1$ and $1$, I use $c=\frac{1}{4}$ to force the desired dominant
+eigenvector to have an eigenvalue of $1.25$ and bring the other eigenvectors
+away from dominance.
+
+Upon implementation, the shifted power method converges for all tested initial
+vectors.
 
 # Appendix
 
 ## Data
 
-Following are the files used as inputs for the power_method program. Each
+Following are the files used as inputs for the power_method program and their
+respective outputs. Each input
 represents a link matrix and follows the specification for .dat files given in
 the assignment handout:
 1. The first line is a single integer $n$ stating the number of nodes in the
@@ -171,20 +198,43 @@ the assignment handout:
 3. On line $j$, after the initial $n_j$, each subsequent integer $i$ points to
    an external page $i$ to which page $j$ links.
 
-```{r engine='bash', comment='bryan_leise_2006_fig1.dat:', echo=F}
+
+bryan_leise_2006_fig1.dat:
+```{r engine='bash', comment='input', echo=F}
 cat ../data/bryan_leise_2006_fig1.dat
 ```
 
-```{r engine='bash', comment='ex1_add_pg_5.dat:', echo=F}
+```{r engine='bash', comment='output', echo=F}
+cat ../data/bryan_leise_2006_fig1.out
+```
+
+ex1_add_pg_5.dat:
+```{r engine='bash', comment='input', echo=F}
 cat ../data/ex1_add_pg_5.dat
 ```
 
-```{r engine='bash', comment='lin_chain_len_4.dat:', echo=F}
+```{r engine='bash', comment='output', echo=F}
+cat ../data/ex1_add_pg_5.out
+```
+
+lin_chain_len_4.dat:
+```{r engine='bash', comment='input', echo=F}
 cat ../data/lin_chain_len_4.dat
 ```
 
-```{r engine='bash', comment='test_A.dat:', echo=F}
-cat ../data/test_A.dat
+using the initial vector $b_0=[1,1,1,1]$,
+```{r engine='bash', comment='output', echo=F}
+cat ../data/lin_chain_len_4.out
+```
+
+using the initial vector $b_0=[1,2,3,4]$,
+```{r engine='bash', comment='output', echo=F}
+cat ../data/lin_chain_len_4.out2
+```
+
+using the initial vector $b_0=[1,2,3,4]$ and a shift of $c=\frac{1}{4}$,
+```{r engine='bash', comment='output', echo=F}
+cat ../data/lin_chain_len_4.out3
 ```
 
 ## Source code
@@ -196,4 +246,8 @@ major algorithmic changes were made.
 
 ```{r engine='bash', comment='', echo=F}
 cat ../src/power_method.c
+```
+
+```{r engine='bash', comment='', echo=F}
+cat ../src/plot_graphs.R
 ```
